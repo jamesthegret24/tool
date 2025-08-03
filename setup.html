@@ -668,9 +668,57 @@
                         timestamp: Date.now()
                     };
 
-                    localStorage.setItem('discord_webhook_url', encryptData(webhookData));
-                    localStorage.setItem('email_remover_directory', encryptData(directory));
-                    localStorage.setItem('email_remover_token', encryptData(token));
+                    // Store data in localStorage with proper encryption
+                    try {
+                        // Store in multiple formats to ensure compatibility
+                        
+                        // Format 1: Store as encrypted JSON object (original method)
+                        localStorage.setItem('discord_webhook_url', encryptData(webhookData));
+                        
+                        // Format 2: Store as direct URL with simple base64 encoding (backup method)
+                        localStorage.setItem('discord_webhook_url_direct', btoa(webhookUrl));
+                        
+                        // Format 3: Store as plain text (fallback method)
+                        localStorage.setItem('discord_webhook_url_plain', webhookUrl);
+                        
+                        // Store directory and token with original method
+                        localStorage.setItem('email_remover_directory', encryptData(directory));
+                        localStorage.setItem('email_remover_token', encryptData(token));
+                        
+                        // Verify storage was successful
+                        const storedWebhook = localStorage.getItem('discord_webhook_url');
+                        const storedWebhookDirect = localStorage.getItem('discord_webhook_url_direct');
+                        const storedWebhookPlain = localStorage.getItem('discord_webhook_url_plain');
+                        const storedDirectory = localStorage.getItem('email_remover_directory');
+                        
+                        console.log('Webhook URL stored successfully (Format 1):', storedWebhook ? 'Yes' : 'No');
+                        console.log('Webhook URL stored successfully (Format 2):', storedWebhookDirect ? 'Yes' : 'No');
+                        console.log('Webhook URL stored successfully (Format 3):', storedWebhookPlain ? 'Yes' : 'No');
+                        console.log('Directory stored successfully:', storedDirectory ? 'Yes' : 'No');
+                        
+                        // Double-check we can decrypt Format 1
+                        try {
+                            const testDecrypt = JSON.parse(atob(storedWebhook));
+                            console.log('Webhook URL can be decrypted (Format 1):', testDecrypt && testDecrypt.url ? 'Yes' : 'No');
+                            if (testDecrypt && testDecrypt.url) {
+                                console.log('Decrypted webhook URL:', testDecrypt.url);
+                            }
+                        } catch (e) {
+                            console.error('Failed to decrypt webhook URL for verification (Format 1):', e);
+                        }
+                        
+                        // Check Format 2
+                        try {
+                            const directDecrypt = atob(storedWebhookDirect);
+                            console.log('Direct webhook URL can be decoded (Format 2):', directDecrypt ? 'Yes' : 'No');
+                            console.log('Decoded direct webhook URL:', directDecrypt);
+                        } catch (e) {
+                            console.error('Failed to decode direct webhook URL (Format 2):', e);
+                        }
+                    } catch (e) {
+                        console.error('Error storing data in localStorage:', e);
+                        showToast('Error storing configuration. Please try again.', 'error');
+                    }
 
                     // Reset button state
                     generateBtn.disabled = false;

