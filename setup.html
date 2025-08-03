@@ -304,9 +304,8 @@
                 const randomPart = Math.random().toString(36).substring(2, 10);
                 const token = `${timestamp}-${randomPart}`;
 
-                // Create the link with encoded parameters
+                // Create the link with only directory and token to make it shorter
                 const params = new URLSearchParams();
-                params.append('webhook', btoa(webhookUrl));
                 params.append('dir', btoa(directory));
                 params.append('token', token);
 
