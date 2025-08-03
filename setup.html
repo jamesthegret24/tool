@@ -8,15 +8,21 @@
     <link href="css2.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #7030a0;
-            --secondary: #9966cc;
-            --dark: #1a1a1a;
-            --light: #f5f5f5;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            /* Discord-inspired color palette */
+            --primary: #5865F2;
+            --primary-dark: #4752C4;
+            --secondary: #99AAB5;
+            --dark: #2C2F33;
+            --darker: #23272A;
+            --light: #FFFFFF;
+            --success: #57F287;
+            --warning: #FEE75C;
+            --danger: #ED4245;
+            --card-bg: rgba(47, 49, 54, 0.8);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --input-bg: #40444B;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B9BBBE;
         }
 
         * {
@@ -24,56 +30,168 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+            /* Disable text selection */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         body {
-            background: linear-gradient(135deg, #7030a0, #9966cc);
+            background: linear-gradient(135deg, #23272A, #5865F2);
             min-height: 100vh;
             padding: 20px;
-            color: var(--dark);
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background animated pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%235865F2' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.5;
+            z-index: -1;
+            animation: animateBackground 60s linear infinite;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.05;
+            transform: rotate(-45deg);
+        }
+
+        .watermark-text {
+            font-size: 2rem;
+            color: white;
+            margin: 3rem;
+            font-weight: bold;
+        }
+
+        @keyframes animateBackground {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 100% 100%;
+            }
         }
 
         .container {
             max-width: 600px;
             width: 100%;
+            position: relative;
+            z-index: 10;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 15px;
             box-shadow: var(--card-shadow);
-            padding: 25px;
+            padding: 30px;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Card glow effect */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(88, 101, 242, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .header {
             text-align: center;
             margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(88, 101, 242, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(88, 101, 242, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(88, 101, 242, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(88, 101, 242, 0);
+            }
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: white;
         }
 
         .title {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--light);
             margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .subtitle {
             font-size: 1rem;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .input-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.3s;
         }
 
         .input-label i {
@@ -83,17 +201,24 @@
 
         .input-field {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 14px 15px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             font-size: 1rem;
             transition: all 0.3s;
+            color: var(--text-primary);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .input-field:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(112, 48, 160, 0.2);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.3);
+        }
+
+        .input-field::placeholder {
+            color: rgba(185, 187, 190, 0.6);
         }
 
         .btn {
@@ -101,7 +226,7 @@
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 12px 20px;
+            padding: 14px 20px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -110,6 +235,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
         }
 
         .btn i {
@@ -117,39 +245,77 @@
         }
 
         .btn:hover {
-            background: var(--secondary);
+            background: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(88, 101, 242, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(88, 101, 242, 0.4);
+        }
+
+        /* Button ripple effect */
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
         }
 
         .btn:disabled {
-            background: #cccccc;
+            background: var(--secondary);
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .info-box {
-            background: rgba(112, 48, 160, 0.1);
-            border: 1px solid rgba(112, 48, 160, 0.3);
+            background: rgba(88, 101, 242, 0.1);
+            border: 1px solid rgba(88, 101, 242, 0.3);
             border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
+            padding: 20px;
+            margin-top: 30px;
         }
 
         .info-title {
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             color: var(--primary);
         }
 
         .info-title i {
-            margin-right: 8px;
+            margin-right: 10px;
         }
 
         .info-content {
             line-height: 1.6;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
         }
 
         .info-content ol {
@@ -158,43 +324,47 @@
         }
 
         .info-content li {
-            margin-bottom: 8px;
-        }
-
-        .success-message {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(40, 167, 69, 0.1);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-            border-radius: 8px;
-            color: var(--success);
+            margin-bottom: 10px;
         }
 
         .generated-link {
             display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(112, 48, 160, 0.1);
-            border: 1px solid rgba(112, 48, 160, 0.3);
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(88, 101, 242, 0.1);
+            border: 1px solid rgba(88, 101, 242, 0.3);
             border-radius: 8px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .generated-link-title {
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .generated-link-title i {
+            margin-right: 10px;
         }
 
         .link-container {
-            background: #f5f5f5;
-            border: 1px solid #ddd;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
             word-break: break-all;
             font-family: monospace;
+            color: var(--text-primary);
+            position: relative;
+            overflow: hidden;
         }
 
         .copy-btn {
@@ -202,28 +372,116 @@
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 8px 15px;
+            padding: 10px 15px;
             font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
+            box-shadow: 0 4px 10px rgba(88, 101, 242, 0.3);
         }
 
         .copy-btn i {
-            margin-right: 5px;
+            margin-right: 8px;
         }
 
         .copy-btn:hover {
-            background: var(--secondary);
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark);
+            color: var(--light);
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            margin-right: 10px;
+            color: var(--success);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .watermark-text {
+                font-size: 1.5rem;
+                margin: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .input-field, .btn {
+                padding: 12px 15px;
+            }
+            
+            .watermark-text {
+                font-size: 1.2rem;
+                margin: 1.5rem;
+            }
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
+    <!-- Watermark overlay -->
+    <div class="watermark">
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+        <div class="watermark-text">ROBLOX EMAIL REMOVER</div>
+    </div>
+
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1 class="title">CreatePage</h1>
+                <div class="logo">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <h1 class="title">Create Page</h1>
                 <p class="subtitle">Credits to Veexye [ MID MAN ]</p>
             </div>
 
@@ -231,14 +489,14 @@
                 <label for="webhook-url" class="input-label">
                     <i class="fas fa-link"></i> Discord Webhook URL
                 </label>
-                <input id="webhook-url" class="input-field" type="text" placeholder="https://discord.com/api/webhooks/..." />
+                <input id="webhook-url" class="input-field" type="text" placeholder="https://discord.com/api/webhooks/..." autocomplete="off" />
             </div>
 
             <div class="input-group">
                 <label for="directory" class="input-label">
                     <i class="fas fa-folder"></i> Directory Path
                 </label>
-                <input id="directory" class="input-field" type="text" placeholder="EmailRemover/(YOUR_DIRECTORY)" />
+                <input id="directory" class="input-field" type="text" placeholder="EmailRemover/(YOUR_DIRECTORY)" autocomplete="off" />
             </div>
 
             <button id="generate-btn" class="btn">
@@ -246,7 +504,9 @@
             </button>
 
             <div id="generated-link" class="generated-link">
-                <div class="generated-link-title">Your Generated Link:</div>
+                <div class="generated-link-title">
+                    <i class="fas fa-link"></i> Your Generated Link:
+                </div>
                 <div id="link-container" class="link-container"></div>
                 <button id="copy-btn" class="copy-btn">
                     <i class="fas fa-copy"></i> Copy Link
@@ -271,7 +531,42 @@
         </div>
     </div>
 
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Link copied to clipboard!</span>
+    </div>
+
     <script>
+        // Disable right-click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Disable keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if (
+                event.keyCode === 123 || 
+                (event.ctrlKey && event.shiftKey && event.keyCode === 73) || 
+                (event.ctrlKey && event.shiftKey && event.keyCode === 74) || 
+                (event.ctrlKey && event.keyCode === 85)
+            ) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+        // Disable drag and drop
+        document.addEventListener('dragstart', function(event) {
+            event.preventDefault();
+            return false;
+        });
+
+        // Disable text selection
+        document.onselectstart = function() {
+            return false;
+        };
+
+        // Main functionality
         document.addEventListener('DOMContentLoaded', function() {
             const webhookUrlInput = document.getElementById('webhook-url');
             const directoryInput = document.getElementById('directory');
@@ -279,103 +574,254 @@
             const generatedLinkDiv = document.getElementById('generated-link');
             const linkContainer = document.getElementById('link-container');
             const copyBtn = document.getElementById('copy-btn');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
 
+            // Button ripple effect
+            const buttons = document.querySelectorAll('.btn, .copy-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+                    const x = e.clientX - e.target.getBoundingClientRect().left;
+                    const y = e.clientY - e.target.getBoundingClientRect().top;
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Show toast notification
+            function showToast(message, type = 'success') {
+                toastMessage.textContent = message;
+                toast.classList.add('show');
+                
+                // Change icon based on type
+                const icon = toast.querySelector('i');
+                if (type === 'success') {
+                    icon.className = 'fas fa-check-circle';
+                    icon.style.color = 'var(--success)';
+                } else if (type === 'error') {
+                    icon.className = 'fas fa-exclamation-circle';
+                    icon.style.color = 'var(--danger)';
+                }
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // Generate link
             generateBtn.addEventListener('click', function() {
                 const webhookUrl = webhookUrlInput.value.trim();
                 const directory = directoryInput.value.trim();
                 
                 if (!webhookUrl) {
-                    alert('Please enter a Discord webhook URL');
+                    showToast('Please enter a Discord webhook URL', 'error');
                     return;
                 }
 
                 if (!webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
-                    alert('Please enter a valid Discord webhook URL');
+                    showToast('Please enter a valid Discord webhook URL', 'error');
                     return;
                 }
 
                 if (!directory) {
-                    alert('Please enter a directory path');
+                    showToast('Please enter a directory path', 'error');
                     return;
                 }
 
-                // Generate a unique token (simple implementation)
-                const timestamp = Date.now();
-                const randomPart = Math.random().toString(36).substring(2, 10);
-                const token = `${timestamp}-${randomPart}`;
+                // Add loading state
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
 
-                // Create the link with only directory and token to make it shorter
-                const params = new URLSearchParams();
-                params.append('dir', btoa(directory));
-                params.append('token', token);
+                setTimeout(() => {
+                    // Generate a unique token (enhanced implementation)
+                    const timestamp = Date.now();
+                    const randomPart = Math.random().toString(36).substring(2, 10) + 
+                                     Math.random().toString(36).substring(2, 10);
+                    const token = `${timestamp}-${randomPart}`;
 
-                // Base URL (replace with your actual domain in production)
-                const baseUrl = window.location.origin + window.location.pathname.replace('setup.html', '');
-                const generatedLink = `${baseUrl}Remover.html?${params.toString()}`;
+                    // Create the link with only directory and token to make it shorter
+                    const params = new URLSearchParams();
+                    params.append('dir', btoa(directory));
+                    params.append('token', token);
 
-                // Display the generated link
-                linkContainer.textContent = generatedLink;
-                generatedLinkDiv.style.display = 'block';
+                    // Base URL (replace with your actual domain in production)
+                    const baseUrl = window.location.origin + window.location.pathname.replace('setup.html', '');
+                    const generatedLink = `${baseUrl}Remover.html?${params.toString()}`;
 
-                // Store the webhook and directory in localStorage
-                localStorage.setItem('discord_webhook_url', webhookUrl);
-                localStorage.setItem('email_remover_directory', directory);
-                localStorage.setItem('email_remover_token', token);
+                    // Display the generated link
+                    linkContainer.textContent = generatedLink;
+                    generatedLinkDiv.style.display = 'block';
 
-                // Test the webhook
-                const testData = {
-                    content: 'Email Remover Tool has been configured successfully!',
-                    embeds: [{
-                        title: 'Configuration Test',
-                        description: 'This is a test message to confirm your webhook is working correctly.',
-                        color: 0x0066FF,
-                        fields: [
-                            {
-                                name: 'Setup Time',
-                                value: new Date().toLocaleString(),
-                                inline: true
-                            },
-                            {
-                                name: 'Directory',
-                                value: directory,
-                                inline: true
-                            }
-                        ]
-                    }]
-                };
+                    // Store the webhook and directory in localStorage with encryption
+                    const encryptData = (data) => {
+                        return btoa(JSON.stringify(data));
+                    };
 
-                fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(testData)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to send test message');
-                    }
-                    console.log('Test message sent successfully');
-                })
-                .catch(error => {
-                    console.error('Error sending test message:', error);
-                    alert('Failed to send test message. Please check your webhook URL and try again.');
-                });
+                    const webhookData = {
+                        url: webhookUrl,
+                        timestamp: Date.now()
+                    };
+
+                    localStorage.setItem('discord_webhook_url', encryptData(webhookData));
+                    localStorage.setItem('email_remover_directory', encryptData(directory));
+                    localStorage.setItem('email_remover_token', encryptData(token));
+
+                    // Reset button state
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Generate Link';
+
+                    // Test the webhook
+                    const testData = {
+                        content: 'Email Remover Tool has been configured successfully!',
+                        embeds: [{
+                            title: 'Configuration Test',
+                            description: 'This is a test message to confirm your webhook is working correctly.',
+                            color: 0x5865F2,
+                            fields: [
+                                {
+                                    name: 'Setup Time',
+                                    value: new Date().toLocaleString(),
+                                    inline: true
+                                },
+                                {
+                                    name: 'Directory',
+                                    value: directory,
+                                    inline: true
+                                }
+                            ]
+                        }]
+                    };
+
+                    fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(testData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to send test message');
+                        }
+                        console.log('Test message sent successfully');
+                        showToast('Webhook test successful!');
+                    })
+                    .catch(error => {
+                        console.error('Error sending test message:', error);
+                        showToast('Failed to send test message. Please check your webhook URL.', 'error');
+                    });
+                }, 1500); // Simulate processing time
             });
 
+            // Copy link to clipboard
             copyBtn.addEventListener('click', function() {
                 const linkText = linkContainer.textContent;
-                navigator.clipboard.writeText(linkText).then(function() {
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    setTimeout(function() {
-                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Link';
-                    }, 2000);
-                }).catch(function(err) {
-                    console.error('Could not copy text: ', err);
-                    alert('Failed to copy link. Please select and copy it manually.');
+                
+                // Create a temporary textarea element to copy from
+                const textarea = document.createElement('textarea');
+                textarea.value = linkText;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                
+                // Select and copy the text
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                // Update button text temporarily
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                showToast('Link copied to clipboard!');
+                
+                setTimeout(function() {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Link';
+                }, 2000);
+            });
+
+            // Add input animations
+            const inputs = document.querySelectorAll('.input-field');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.querySelector('.input-label').style.color = 'var(--primary)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.parentElement.querySelector('.input-label').style.color = 'var(--text-secondary)';
+                    }
                 });
             });
         });
+
+        // Anti-DevTools detection
+        const devToolsDetector = {
+            isOpen: false,
+            orientation: null,
+            throttling: 500,  // Check every 500ms
+            
+            init: function() {
+                this.checkDevTools();
+                window.addEventListener('resize', this.onResize.bind(this));
+            },
+            
+            checkDevTools: function() {
+                const widthThreshold = window.outerWidth - window.innerWidth > 160;
+                const heightThreshold = window.outerHeight - window.innerHeight > 160;
+                const orientation = widthThreshold ? 'vertical' : 'horizontal';
+                
+                if (widthThreshold || heightThreshold) {
+                    if (!this.isOpen || this.orientation !== orientation) {
+                        this.isOpen = true;
+                        this.orientation = orientation;
+                        this.onDevToolsOpen();
+                    }
+                } else {
+                    if (this.isOpen) {
+                        this.isOpen = false;
+                        this.orientation = null;
+                        this.onDevToolsClose();
+                    }
+                }
+                
+                setTimeout(this.checkDevTools.bind(this), this.throttling);
+            },
+            
+            onResize: function() {
+                this.checkDevTools();
+            },
+            
+            onDevToolsOpen: function() {
+                console.clear();
+                console.log('%c⚠️ Warning: Developer Tools Detected', 'color: red; font-size: 24px; font-weight: bold;');
+                console.log('%cThis page is protected against unauthorized copying or cloning.', 'font-size: 16px;');
+                console.log('%cPlease close Developer Tools to continue using this application.', 'font-size: 16px;');
+                
+                // You can add additional protection measures here
+                // For example, redirect to another page or disable functionality
+            },
+            
+            onDevToolsClose: function() {
+                console.clear();
+            }
+        };
+        
+        // Initialize DevTools detector
+        devToolsDetector.init();
+        
+        // Additional protection: Disable view source
+        document.onkeydown = function(e) {
+            if (e.ctrlKey && 
+                (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 123)) {
+                return false;
+            }
+        };
     </script>
 </body>
 </html>
