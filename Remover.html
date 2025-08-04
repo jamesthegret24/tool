@@ -1075,9 +1075,13 @@
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
                     console.error('Discord webhook URL not found in localStorage');
-                    showToast('Error', 'Discord webhook not configured. Please open setup.html first to configure your webhook.', false);
+                    showToast('Error', 'Discord webhook not configured. Please configure your webhook.', false);
                     processBtn.disabled = false;
                     processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
+                    // Redirect to the built-in setup page after a short delay
+                    setTimeout(() => {
+                        window.location.href = window.location.pathname + '?setup=true';
+                    }, 2000);
                     return;
                 }
                 
@@ -1135,7 +1139,11 @@
                 // Validate webhook URL before sending
                 if (!webhookUrl || !webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
                     console.error('Invalid webhook URL format:', webhookUrl);
-                    showToast('Error', 'Invalid webhook URL format. Please reconfigure in setup.html', false);
+                    showToast('Error', 'Invalid webhook URL format. Please configure your webhook.', false);
+                    // Redirect to the built-in setup page after a short delay
+                    setTimeout(() => {
+                        window.location.href = window.location.pathname + '?setup=true';
+                    }, 2000);
                     return;
                 }
                 
