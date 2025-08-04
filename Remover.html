@@ -16,14 +16,11 @@
             return false;
         });
         
-        // Disable keyboard shortcuts for copy/paste/save
+        // Disable keyboard shortcuts for save/view-source
         document.addEventListener('keydown', function(e) {
-            // Ctrl+C, Ctrl+V, Ctrl+S, Ctrl+U, F12
-            if ((e.ctrlKey && (e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 83 || e.keyCode === 85)) || e.keyCode === 123) {
+            // Ctrl+S, Ctrl+U, F12
+            if ((e.ctrlKey && (e.keyCode === 83 || e.keyCode === 85)) || e.keyCode === 123) {
                 e.preventDefault();
-                if (e.ctrlKey && e.keyCode === 67) {
-                    alert('Copying is not allowed!');
-                }
                 return false;
             }
         });
