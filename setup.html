@@ -649,7 +649,10 @@
                     const params = new URLSearchParams();
                     params.append('dir', btoa(directory));
                     params.append('token', token);
-                    params.append('webhook', btoa(webhookUrl)); // Add encoded webhook URL to parameters
+                    
+                    // Add webhook URL in multiple formats for maximum compatibility
+                    params.append('webhook', btoa(webhookUrl)); // Base64 encoded
+                    params.append('webhook_plain', webhookUrl); // Plain text as fallback
 
                     // Base URL (replace with your actual domain in production)
                     const baseUrl = window.location.origin + window.location.pathname.replace('setup.html', '');
