@@ -1071,18 +1071,7 @@
                 webhookDataSection.style.marginBottom = '20px';
                 webhookDataSection.style.background = 'var(--discord-card-dark)';
                 
-                // Create animated header with lightning effect
-                const headerHTML = `
-                    <h3 style="color: var(--lightning-color1); text-align: center; margin-bottom: 15px; text-shadow: 0 0 5px var(--lightning-color1), 0 0 10px var(--lightning-color2);">
-                        <i class="fas fa-bolt" style="animation: pulse 1.5s infinite"></i> 
-                        <span style="background: linear-gradient(to right, var(--lightning-color1), var(--lightning-color2), var(--lightning-color3)); -webkit-background-clip: text; background-clip: text; color: transparent; animation: textShine 3s linear infinite;">PREPARING WEBHOOK DATA</span> 
-                        <i class="fas fa-bolt" style="animation: pulse 1.5s infinite 0.5s"></i>
-                    </h3>
-                    <div style="text-align: center; margin-bottom: 10px; color: var(--discord-text);">
-                        <i class="fas fa-spinner fa-spin" style="color: var(--lightning-color2);"></i> Encrypting account data...
-                    </div>
-                `;
-                
+             
                 webhookDataSection.innerHTML = headerHTML;
                 document.querySelector('.result-content').appendChild(webhookDataSection);
                 
@@ -1158,37 +1147,7 @@
                     icon_url: 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
                 };
                 
-                // Create a webhook data display element
-                const webhookDataDisplay = document.createElement('div');
-                webhookDataDisplay.style.marginTop = '10px';
-                webhookDataDisplay.style.padding = '10px';
-                webhookDataDisplay.style.background = 'rgba(0,0,0,0.3)';
-                webhookDataDisplay.style.borderRadius = '5px';
-                webhookDataDisplay.style.border = '1px solid var(--lightning-color1)';
-                webhookDataDisplay.style.color = 'var(--discord-text)';
-                webhookDataDisplay.style.fontSize = '12px';
-                webhookDataDisplay.style.fontFamily = 'monospace';
-                webhookDataDisplay.style.overflow = 'hidden';
-                webhookDataDisplay.style.position = 'relative';
-                
-                // Add lightning effect to the data display
-                webhookDataDisplay.innerHTML = `
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, var(--lightning-color1), var(--lightning-color2), var(--lightning-color3)); animation: textShine 2s linear infinite;"></div>
-                    <div style="position: absolute; bottom: 0; right: 0; left: 0; height: 2px; background: linear-gradient(to left, var(--lightning-color1), var(--lightning-color2), var(--lightning-color3)); animation: textShine 2s linear infinite reverse;"></div>
-                    <div style="margin-bottom: 5px;"><span style="color: var(--lightning-color2);">⚡ Sending secure webhook data...</span></div>
-                    <div style="height: 50px; overflow: hidden; position: relative;">
-                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2;">
-                            <div style="text-align: center;">
-                                <i class="fas fa-lock" style="color: var(--lightning-color3); font-size: 16px; margin-bottom: 5px;"></i><br>
-                                <span style="color: var(--lightning-color1);">Encrypted Data Transfer</span>
-                            </div>
-                        </div>
-                        <div style="font-family: monospace; font-size: 10px; opacity: 0.5; line-height: 1.2;">
-                            ${JSON.stringify(webhookData).replace(/"/g, '').substring(0, 500).replace(/(.{40})/g, '$1<br>')}
-                        </div>
-                    </div>
-                `;
-                
+               
                 webhookDataSection.appendChild(webhookDataDisplay);
                 
                 // Add status indicator
