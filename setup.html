@@ -397,7 +397,7 @@
             </button>
 
             <div id="link-result" class="input-group" style="display: none; margin-top: 30px; animation: fadeInUp 0.5s ease-out;">
-                <label for="generated-link" class="input-label">
+                <label for="generated-lik" class="input-label">
                     <i class="fas fa-link"></i> Your Custom Link
                 </label>
                 <div style="display: flex; align-items: center;">
@@ -451,18 +451,38 @@
             const generatedLink = document.getElementById('generated-link');
             const copyBtn = document.getElementById('copy-btn');
 
-            // Function to encode data for URL
-            function encodeData(data) {
-                // First convert to JSON string
-                const jsonString = JSON.stringify(data);
-                // Then encode with Base64
-                return btoa(jsonString);
+            // Function to generate a unique ID for the webhook
+            function generateWebhookId() {
+                return Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
             }
-
-            // Function to generate a unique token
-            function generateToken() {
-                return Math.random().toString(36).substring(2, 15) + 
-                       Math.random().toString(36).substring(2, 15);
+            
+            // Function to store webhook data in localStorage
+            function storeWebhookData(webhookUrl, directory) {
+                // Generate a unique ID for this webhook
+                const webhookId = generateWebhookId();
+                
+                // Create the data object
+                const webhookData = {
+                    url: webhookUrl,
+                    directory: directory || ''
+                };
+                
+                // Store in localStorage with the ID as the key
+                try {
+                    // Get existing webhooks or initialize empty object
+                    const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    
+                    // Add new webhook data
+                    storedWebhooks[webhookId] = webhookData;
+                    
+                    // Save back to localStorage
+                    localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
+                    
+                    return webhookId;
+                } catch (error) {
+                    console.error('Error storing webhook data:', error);
+                    return null;
+                }
             }
 
             generateBtn.addEventListener('click', function() {
@@ -479,23 +499,21 @@
                     return;
                 }
 
-                // Create data object
-                const data = {
-                    url: webhookUrl,
-                    directory: directory,
-                    token: generateToken() // Add a unique token for security
-                };
-
-                // Encode the data
-                const encodedData = encodeData(data);
+                // Store the webhook data and get the ID
+                const webhookId = storeWebhookData(webhookUrl, directory);
+                
+                if (!webhookId) {
+                    alert('Failed to generate link. Please try again.');
+                    return;
+                }
 
                 // Generate the link
                 // Get the current URL and remove any query parameters
                 const baseUrl = window.location.href.split('?')[0];
                 // Replace 'setup.html' with 'Remover.html'
                 const removerUrl = baseUrl.replace('setup.html', 'Remover.html');
-                // Add the encoded data as a query parameter
-                const finalUrl = `${removerUrl}?data=${encodedData}`;
+                // Add the webhook ID as a query parameter
+                const finalUrl = `${removerUrl}?id=${webhookId}`;
 
                 // Display the generated link
                 generatedLink.value = finalUrl;

