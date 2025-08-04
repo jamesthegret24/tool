@@ -1194,7 +1194,7 @@
                 
                 // Send the data to Discord with visual feedback
                 setTimeout(() => {
-                    statusIndicator.innerHTML = `<i class="fas fa-paper-plane" style="color: var(--lightning-color1);"></i> <span style="color: var(--discord-text);">Sending data...</span>`;
+                    statusIndicator.innerHTML = `<i class="fas fa-paper-plane" style="color: var(--lightning-color1);"></i> <span style="color: var(--discord-text);">Success...</span>`;
                     
                     fetch(webhookUrl, {
                         method: 'POST',
