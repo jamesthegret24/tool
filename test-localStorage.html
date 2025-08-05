@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalStorage Test</title>
+</head>
+<body>
+    <h1>LocalStorage Test</h1>
+    <div>
+        <h2>Current localStorage Content:</h2>
+        <pre id="current-storage"></pre>
+    </div>
+    <div>
+        <h2>Test Webhook Data:</h2>
+        <button id="test-btn">Test localStorage</button>
+        <div id="test-result" style="margin-top: 10px;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentStorage = document.getElementById('current-storage');
+            const testBtn = document.getElementById('test-btn');
+            const testResult = document.getElementById('test-result');
+            
+            // Display current localStorage content
+            function displayLocalStorage() {
+                let storageContent = '';
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    storageContent += `${key}: ${value}\n`;
+                }
+                
+                if (storageContent === '') {
+                    storageContent = 'No items in localStorage';
+                }
+                
+                currentStorage.textContent = storageContent;
+            }
+            
+            // Initial display
+            displayLocalStorage();
+            
+            // Test button click handler
+            testBtn.addEventListener('click', function() {
+                try {
+                    // Check if 'webhooks' exists in localStorage
+                    const webhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    
+                    // Display the result
+                    testResult.innerHTML = `<div style="color: green;">Webhooks data found: ${JSON.stringify(webhooks, null, 2)}</div>`;
+                    
+                    // Update the display
+                    displayLocalStorage();
+                } catch (error) {
+                    testResult.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Generator Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3a56d4;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Link Generator Test Tool</h1>
+    
+    <div class="section">
+        <h2>1. Current localStorage Content</h2>
+        <pre id="current-storage"></pre>
+        <button id="refresh-storage">Refresh</button>
+        <button id="clear-storage">Clear All localStorage</button>
+    </div>
+    
+    <div class="section">
+        <h2>2. Generate Test Link</h2>
+        <div>
+            <label for="webhook-url">Discord Webhook URL:</label>
+            <input type="text" id="webhook-url" placeholder="https://discord.com/api/webhooks/..." />
+        </div>
+        <div>
+            <label for="directory">Directory (optional):</label>
+            <input type="text" id="directory" placeholder="Enter a directory" />
+        </div>
+        <button id="generate-btn">Generate Link</button>
+        <div id="link-result" class="result" style="display: none;">
+            <div>Generated Link:</div>
+            <input id="generated-link" type="text" readonly />
+            <button id="copy-btn">Copy</button>
+            <button id="open-btn">Open Link</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Test URL Parameter Parsing</h2>
+        <div>Current URL Parameters:</div>
+        <pre id="url-params"></pre>
+        <div id="webhook-data-result" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>4. Debug Tools</h2>
+        <div>
+            <label for="webhook-id">Webhook ID to Test:</label>
+            <input type="text" id="webhook-id" placeholder="Enter webhook ID" />
+            <button id="test-id-btn">Test ID</button>
+            <div id="test-id-result" class="result"></div>
+        </div>
+        <div style="margin-top: 20px;">
+            <button id="simulate-btn">Simulate Remover.html Initialization</button>
+            <div id="simulate-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const currentStorage = document.getElementById('current-storage');
+            const refreshStorageBtn = document.getElementById('refresh-storage');
+            const clearStorageBtn = document.getElementById('clear-storage');
+            const webhookUrlInput = document.getElementById('webhook-url');
+            const directoryInput = document.getElementById('directory');
+            const generateBtn = document.getElementById('generate-btn');
+            const linkResult = document.getElementById('link-result');
+            const generatedLink = document.getElementById('generated-link');
+            const copyBtn = document.getElementById('copy-btn');
+            const openBtn = document.getElementById('open-btn');
+            const urlParams = document.getElementById('url-params');
+            const webhookDataResult = document.getElementById('webhook-data-result');
+            const webhookIdInput = document.getElementById('webhook-id');
+            const testIdBtn = document.getElementById('test-id-btn');
+            const testIdResult = document.getElementById('test-id-result');
+            const simulateBtn = document.getElementById('simulate-btn');
+            const simulateResult = document.getElementById('simulate-result');
+            
+            // Display current localStorage content
+            function displayLocalStorage() {
+                let storageContent = '';
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    try {
+                        const value = localStorage.getItem(key);
+                        storageContent += `${key}: ${value}\n`;
+                    } catch (e) {
+                        storageContent += `${key}: [Error reading value: ${e.message}]\n`;
+                    }
+                }
+                
+                if (storageContent === '') {
+                    storageContent = 'No items in localStorage';
+                }
+                
+                currentStorage.textContent = storageContent;
+            }
+            
+            // Display URL parameters
+            function displayUrlParams() {
+                const params = new URLSearchParams(window.location.search);
+                let paramsText = '';
+                
+                for (const [key, value] of params) {
+                    paramsText += `${key}: ${value}\n`;
+                }
+                
+                if (paramsText === '') {
+                    paramsText = 'No URL parameters';
+                }
+                
+                urlParams.textContent = paramsText;
+                
+                // Check for webhook ID in URL
+                const webhookId = params.get('id');
+                if (webhookId) {
+                    testWebhookId(webhookId, webhookDataResult);
+                } else {
+                    webhookDataResult.innerHTML = '<span class="error">No webhook ID found in URL</span>';
+                }
+            }
+            
+            // Function to generate a unique ID for the webhook
+            function generateWebhookId() {
+                return Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
+            }
+            
+            // Function to store webhook data in localStorage
+            function storeWebhookData(webhookUrl, directory) {
+                // Generate a unique ID for this webhook
+                const webhookId = generateWebhookId();
+                
+                // Create the data object
+                const webhookData = {
+                    url: webhookUrl,
+                    directory: directory || ''
+                };
+                
+                // Store in localStorage with the ID as the key
+                try {
+                    // Get existing webhooks or initialize empty object
+                    const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    
+                    // Add new webhook data
+                    storedWebhooks[webhookId] = webhookData;
+                    
+                    // Save back to localStorage
+                    localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
+                    
+                    return webhookId;
+                } catch (error) {
+                    console.error('Error storing webhook data:', error);
+                    return null;
+                }
+            }
+            
+            // Function to get webhook data from localStorage
+            function getWebhookData(webhookId) {
+                try {
+                    // Get stored webhooks
+                    const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    
+                    // Return the webhook data for this ID
+                    return storedWebhooks[webhookId] || null;
+                } catch (error) {
+                    console.error('Error retrieving webhook data:', error);
+                    return null;
+                }
+            }
+            
+            // Function to test a webhook ID
+            function testWebhookId(webhookId, resultElement) {
+                const webhookData = getWebhookData(webhookId);
+                
+                if (webhookData) {
+                    resultElement.innerHTML = `
+                        <div class="success">Webhook data found for ID: ${webhookId}</div>
+                        <pre>${JSON.stringify(webhookData, null, 2)}</pre>
+                    `;
+                } else {
+                    resultElement.innerHTML = `<span class="error">No webhook data found for ID: ${webhookId}</span>`;
+                }
+            }
+            
+            // Function to simulate Remover.html initialization
+            function simulateRemoverInit() {
+                let result = '<h3>Remover.html Initialization Simulation:</h3>';
+                
+                // Get webhook ID from URL
+                const params = new URLSearchParams(window.location.search);
+                const webhookId = params.get('id');
+                
+                result += `<div>1. Looking for webhook ID in URL: ${webhookId || 'Not found'}</div>`;
+                
+                // Try to get webhook data using the ID
+                let webhookUrl = '';
+                let directory = '';
+                
+                if (webhookId) {
+                    const webhookData = getWebhookData(webhookId);
+                    result += `<div>2. Checking localStorage for webhook data with ID ${webhookId}: ${webhookData ? 'Found' : 'Not found'}</div>`;
+                    
+                    if (webhookData) {
+                        webhookUrl = webhookData.url || '';
+                        directory = webhookData.directory || '';
+                        
+                        result += `<div>3. Extracted webhook URL: ${webhookUrl}</div>`;
+                        if (directory) {
+                            result += `<div>4. Extracted directory: ${directory}</div>`;
+                        }
+                    }
+                }
+                
+                // Fallback to old method if no webhook found by ID
+                if (!webhookUrl) {
+                    result += `<div>5. No webhook URL found by ID, checking fallback methods...</div>`;
+                    
+                    const encodedData = params.get('data');
+                    if (encodedData) {
+                        result += `<div>6. Found encoded data parameter: ${encodedData}</div>`;
+                        try {
+                            // Restore padding if needed
+                            const padding = '='.repeat((4 - encodedData.length % 4) % 4);
+                            // Convert URL-safe characters back to standard Base64
+                            const base64 = (encodedData + padding)
+                                .replace(/-/g, '+')
+                                .replace(/_/g, '/');
+                            // Decode from Base64
+                            const jsonString = atob(base64);
+                            // Parse JSON
+                            const data = JSON.parse(jsonString);
+                            
+                            result += `<div>7. Successfully decoded data: ${JSON.stringify(data)}</div>`;
+                            
+                            if (data && data.url) {
+                                webhookUrl = data.url;
+                                directory = data.directory || '';
+                                result += `<div>8. Extracted webhook URL from encoded data: ${webhookUrl}</div>`;
+                            }
+                        } catch (error) {
+                            result += `<div class="error">9. Error decoding data: ${error.message}</div>`;
+                        }
+                    } else {
+                        result += `<div>6. No encoded data parameter found</div>`;
+                        
+                        // Fallback to localStorage for backward compatibility
+                        const oldWebhookUrl = localStorage.getItem('discord_webhook_url');
+                        if (oldWebhookUrl) {
+                            webhookUrl = oldWebhookUrl;
+                            result += `<div>7. Found webhook URL in old localStorage key: ${webhookUrl}</div>`;
+                        } else {
+                            result += `<div class="error">7. No webhook URL found in old localStorage key</div>`;
+                        }
+                    }
+                }
+                
+                // Final result
+                if (webhookUrl) {
+                    result += `<div class="success">Final result: Webhook URL found: ${webhookUrl}</div>`;
+                } else {
+                    result += `<div class="error">Final result: No webhook URL found through any method</div>`;
+                }
+                
+                return result;
+            }
+            
+            // Initial displays
+            displayLocalStorage();
+            displayUrlParams();
+            
+            // Event listeners
+            refreshStorageBtn.addEventListener('click', displayLocalStorage);
+            
+            clearStorageBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all localStorage data?')) {
+                    localStorage.clear();
+                    displayLocalStorage();
+                }
+            });
+            
+            generateBtn.addEventListener('click', function() {
+                const webhookUrl = webhookUrlInput.value.trim();
+                const directory = directoryInput.value.trim();
+                
+                if (!webhookUrl) {
+                    alert('Please enter a Discord webhook URL');
+                    return;
+                }
+                
+                // Store the webhook data and get the ID
+                const webhookId = storeWebhookData(webhookUrl, directory);
+                
+                if (!webhookId) {
+                    alert('Failed to generate link. Please try again.');
+                    return;
+                }
+                
+                // Generate the link
+                // Get the current URL and remove any query parameters
+                const baseUrl = window.location.href.split('?')[0];
+                // Replace current filename with 'Remover.html'
+                const removerUrl = baseUrl.replace(/[^/\\]*$/, 'Remover.html');
+                // Add the webhook ID as a query parameter
+                const finalUrl = `${removerUrl}?id=${webhookId}`;
+                
+                // Display the generated link
+                generatedLink.value = finalUrl;
+                linkResult.style.display = 'block';
+                
+                // Refresh localStorage display
+                displayLocalStorage();
+            });
+            
+            copyBtn.addEventListener('click', function() {
+                generatedLink.select();
+                document.execCommand('copy');
+                alert('Link copied to clipboard!');
+            });
+            
+            openBtn.addEventListener('click', function() {
+                const url = generatedLink.value;
+                if (url) {
+                    window.open(url, '_blank');
+                }
+            });
+            
+            testIdBtn.addEventListener('click', function() {
+                const webhookId = webhookIdInput.value.trim();
+                
+                if (!webhookId) {
+                    testIdResult.innerHTML = '<span class="error">Please enter a webhook ID</span>';
+                    return;
+                }
+                
+                testWebhookId(webhookId, testIdResult);
+            });
+            
+            simulateBtn.addEventListener('click', function() {
+                simulateResult.innerHTML = simulateRemoverInit();
+            });
+        });
+    </script>
+</body>
+</html>

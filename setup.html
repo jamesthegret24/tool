@@ -470,13 +470,32 @@
                 // Store in localStorage with the ID as the key
                 try {
                     // Get existing webhooks or initialize empty object
-                    const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    let storedWebhooks = {};
+                    try {
+                        const existingData = localStorage.getItem('webhooks');
+                        if (existingData) {
+                            storedWebhooks = JSON.parse(existingData);
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing existing webhooks, resetting:', parseError);
+                        storedWebhooks = {};
+                    }
                     
                     // Add new webhook data
                     storedWebhooks[webhookId] = webhookData;
                     
                     // Save back to localStorage
-                    localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
+                    const dataToStore = JSON.stringify(storedWebhooks);
+                    localStorage.setItem('webhooks', dataToStore);
+                    
+                    // Debug: Verify storage
+                    console.log('Stored webhook ID:', webhookId);
+                    console.log('Stored webhook data:', webhookData);
+                    console.log('All webhooks data:', storedWebhooks);
+                    console.log('Stored JSON string:', dataToStore);
+                    
+                    // Also store in legacy format for backward compatibility
+                    localStorage.setItem('discord_webhook_url', webhookUrl);
                     
                     return webhookId;
                 } catch (error) {
@@ -505,6 +524,16 @@
                 if (!webhookId) {
                     alert('Failed to generate link. Please try again.');
                     return;
+                }
+                
+                // Verify storage
+                try {
+                    const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    console.log('Stored webhooks after generation:', storedWebhooks);
+                    console.log('Generated webhook ID:', webhookId);
+                    console.log('Webhook data for this ID:', storedWebhooks[webhookId]);
+                } catch (error) {
+                    console.error('Error verifying webhook storage:', error);
                 }
 
                 // Generate the link

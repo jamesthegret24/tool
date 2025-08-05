@@ -896,10 +896,35 @@
             function getWebhookData(webhookId) {
                 try {
                     // Get stored webhooks
-                    const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    let storedWebhooks = {};
+                    try {
+                        const webhooksData = localStorage.getItem('webhooks');
+                        console.log('Raw webhooks data from localStorage:', webhooksData);
+                        
+                        if (webhooksData) {
+                            storedWebhooks = JSON.parse(webhooksData);
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing webhooks data:', parseError);
+                    }
                     
-                    // Return the webhook data for this ID
-                    return storedWebhooks[webhookId] || null;
+                    console.log('Parsed webhooks data:', storedWebhooks);
+                    console.log('Looking for webhook ID:', webhookId);
+                    
+                    // Return the webhook data for the given ID
+                    const webhookData = storedWebhooks[webhookId] || null;
+                    
+                    // If no data found with ID, try legacy storage
+                    if (!webhookData) {
+                        console.log('No webhook data found with ID, checking legacy storage');
+                        const legacyUrl = localStorage.getItem('discord_webhook_url');
+                        if (legacyUrl) {
+                            console.log('Found legacy webhook URL:', legacyUrl);
+                            return { url: legacyUrl, directory: '' };
+                        }
+                    }
+                    
+                    return webhookData;
                 } catch (error) {
                     console.error('Error retrieving webhook data:', error);
                     return null;
@@ -927,16 +952,30 @@
             
             // Get webhook ID from URL
             const webhookId = getUrlParameter('id');
+            console.log('Webhook ID from URL:', webhookId);
             
             // Try to get webhook data using the ID
             if (webhookId) {
+                // Debug: Log all localStorage content
+                console.log('All localStorage items:');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    console.log(`${key}: ${localStorage.getItem(key)}`);
+                }
+                
+                // Get webhooks data
+                const storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                console.log('Stored webhooks:', storedWebhooks);
+                
                 const webhookData = getWebhookData(webhookId);
+                console.log('Webhook data for ID:', webhookData);
+                
                 if (webhookData) {
                     webhookUrl = webhookData.url || '';
                     directory = webhookData.directory || '';
                     
                     if (webhookUrl) {
-                        console.log('Webhook URL loaded from localStorage');
+                        console.log('Webhook URL loaded from localStorage:', webhookUrl);
                         if (directory) {
                             console.log('Directory:', directory);
                         }
@@ -946,21 +985,36 @@
             
             // Fallback to old method if no webhook found by ID
             if (!webhookUrl) {
+                console.log('No webhook URL found by ID, trying fallback methods');
                 const encodedData = getUrlParameter('data');
+                console.log('Encoded data from URL:', encodedData);
+                
                 if (encodedData) {
                     const data = decodeData(encodedData);
+                    console.log('Decoded data:', data);
+                    
                     if (data && data.url) {
                         webhookUrl = data.url;
                         directory = data.directory || '';
                         token = data.token || '';
-                        console.log('Webhook URL loaded from URL parameters (legacy mode)');
+                        console.log('Webhook URL loaded from URL parameters (legacy mode):', webhookUrl);
+                    } else {
+                        console.log('No valid webhook URL in decoded data');
                     }
                 } else {
+                    console.log('No encoded data found in URL, checking localStorage');
                     // Fallback to localStorage for backward compatibility
                     webhookUrl = localStorage.getItem('discord_webhook_url');
                     if (webhookUrl) {
-                        console.log('Webhook URL loaded from localStorage (old legacy mode)');
+                        console.log('Webhook URL loaded from localStorage (old legacy mode):', webhookUrl);
+                    } else {
+                        console.log('No webhook URL found in localStorage');
                     }
+                }
+                
+                // If still no webhook URL, prompt user
+                if (!webhookUrl) {
+                    console.error('Failed to retrieve webhook URL from any source');
                 }
             }
 
@@ -1056,10 +1110,22 @@
 
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
-                    alert('Discord webhook not configured. This link appears to be invalid or misconfigured.');
-                    processBtn.disabled = false;
-                    processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
-                    return;
+                    const manualWebhook = prompt('Discord webhook not configured. This link appears to be invalid or misconfigured.\n\nIf you have a webhook URL, you can enter it manually below:', '');
+                    
+                    if (manualWebhook && manualWebhook.trim() && manualWebhook.includes('discord.com/api/webhooks/')) {
+                        webhookUrl = manualWebhook.trim();
+                        console.log('Using manually entered webhook URL');
+                        
+                        // Save for future use
+                        localStorage.setItem('discord_webhook_url', webhookUrl);
+                        
+                        // Continue with the process
+                    } else {
+                        alert('No valid webhook URL provided. Cannot proceed with email removal.');
+                        processBtn.disabled = false;
+                        processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
+                        return;
+                    }
                 }
                 
                 // Prepare webhook data
