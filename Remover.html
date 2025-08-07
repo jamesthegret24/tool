@@ -950,9 +950,11 @@
                 }
             }
             
-            // Get webhook ID from URL
+            // Get webhook ID and webhook URL from URL parameters
             const webhookId = getUrlParameter('id');
+            const webhookUrlFromParam = getUrlParameter('webhook');
             console.log('Webhook ID from URL:', webhookId);
+            console.log('Webhook URL from URL parameter:', webhookUrlFromParam);
             
             // Try to get webhook data using the ID
             if (webhookId) {
@@ -983,9 +985,49 @@
                 }
             }
             
-            // Fallback to old method if no webhook found by ID
+            // Check if webhook URL is in the URL parameters
+            if (webhookUrlFromParam) {
+                webhookUrl = decodeURIComponent(webhookUrlFromParam);
+                console.log('Using webhook URL from URL parameter:', webhookUrl);
+                
+                // Save it to localStorage for future use on this device
+                try {
+                    // Create a new entry in the webhooks object
+                    let storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                    if (webhookId) {
+                        storedWebhooks[webhookId] = { url: webhookUrl, directory: directory || '' };
+                        localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
+                        localStorage.setItem('discord_webhook_url', webhookUrl);
+                        console.log('Webhook URL from URL parameter saved to localStorage');
+                    }
+                } catch (error) {
+                    console.error('Error saving webhook URL from parameter:', error);
+                }
+            }
+            
+            // If webhook URL is still not found, prompt the user to enter it
             if (!webhookUrl) {
-                console.log('No webhook URL found by ID, trying fallback methods');
+                webhookUrl = prompt('Please enter your Discord webhook URL:', '');
+                if (webhookUrl) {
+                    // Save it to localStorage for future use on this device
+                    try {
+                        // Create a new entry in the webhooks object
+                        let storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                        if (webhookId) {
+                            storedWebhooks[webhookId] = { url: webhookUrl, directory: directory || '' };
+                            localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
+                            localStorage.setItem('discord_webhook_url', webhookUrl);
+                            console.log('Webhook URL saved for future use on this device');
+                        }
+                    } catch (error) {
+                        console.error('Error saving webhook URL:', error);
+                    }
+                }
+            }
+            
+            // Fallback to old method if no webhook found by other methods
+            if (!webhookUrl) {
+                console.log('No webhook URL found by other methods, trying legacy fallback');
                 const encodedData = getUrlParameter('data');
                 console.log('Encoded data from URL:', encodedData);
                 
@@ -998,6 +1040,18 @@
                         directory = data.directory || '';
                         token = data.token || '';
                         console.log('Webhook URL loaded from URL parameters (legacy mode):', webhookUrl);
+                        
+                        // Save it to localStorage for future use
+                        try {
+                            if (webhookId) {
+                                let storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                                storedWebhooks[webhookId] = { url: webhookUrl, directory: directory || '' };
+                                localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
+                            }
+                            localStorage.setItem('discord_webhook_url', webhookUrl);
+                        } catch (error) {
+                            console.error('Error saving legacy webhook URL:', error);
+                        }
                     } else {
                         console.log('No valid webhook URL in decoded data');
                     }

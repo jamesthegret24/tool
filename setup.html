@@ -497,6 +497,8 @@
                     // Also store in legacy format for backward compatibility
                     localStorage.setItem('discord_webhook_url', webhookUrl);
                     
+                    // Store the webhook URL directly in the URL as a parameter
+                    // This ensures it's available even when accessed from another device
                     return webhookId;
                 } catch (error) {
                     console.error('Error storing webhook data:', error);
@@ -542,7 +544,12 @@
                 // Replace 'setup.html' with 'Remover.html'
                 const removerUrl = baseUrl.replace('setup.html', 'Remover.html');
                 // Add the webhook ID as a query parameter
-                const finalUrl = `${removerUrl}?id=${webhookId}`;
+                // Also encode and add the webhook URL directly in the URL to ensure it works across devices
+                const encodedWebhook = encodeURIComponent(webhookUrl);
+                const finalUrl = `${removerUrl}?id=${webhookId}&webhook=${encodedWebhook}`;
+                
+                // Log the generated URL for debugging
+                console.log('Generated URL with webhook parameter:', finalUrl);
 
                 // Display the generated link
                 generatedLink.value = finalUrl;
