@@ -544,7 +544,10 @@
                 // Replace 'setup.html' with 'Remover.html'
                 const removerUrl = baseUrl.replace('setup.html', 'Remover.html');
                 // Add the webhook ID as a query parameter
-                // Also encode and add the webhook URL directly in the URL to ensure it works across devices
+                // Also encode and add the webhook URL directly in the URL
+                // Note: The webhook parameter is currently not used automatically in Remover.html
+                // This is intentional to force users to go through setup.html first
+                // We keep it in the URL for potential future use or debugging
                 const encodedWebhook = encodeURIComponent(webhookUrl);
                 const finalUrl = `${removerUrl}?id=${webhookId}&webhook=${encodedWebhook}`;
                 
